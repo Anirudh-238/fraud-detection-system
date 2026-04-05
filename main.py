@@ -34,6 +34,11 @@ from rule_engine import (
 )
 from ml_engine import load_all_models, score_request
 
+from database import init_db, get_db
+from auth import register_user, login_user
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
 # ─────────────────────────────────────────────
 # App setup
 # ─────────────────────────────────────────────
@@ -93,6 +98,7 @@ async def sse_event_generator(request: Request) -> AsyncGenerator[str, None]:
 async def startup_event():
     print("\n[Startup] Loading ML models...")
     load_all_models()
+    init_db()
     print("[Startup] All models loaded. Server ready.\n")
 
 
@@ -254,6 +260,45 @@ async def check_promo(req: PromoRequest):
 
     return response
 
+
+
+# ─────────────────────────────────────────────
+# Auth routes (Day 4)
+# ─────────────────────────────────────────────
+
+@app.post("/auth/register", tags=["Auth"])
+async def register(req: Request, db: Session = Depends(get_db)):
+    body = await req.json()
+    result = register_user(
+        email     = body.get("email"),
+        full_name = body.get("full_name"),
+        password  = body.get("password"),
+        request   = req,
+        db        = db,
+    )
+    if result["action"] == "block":
+        response = JSONResponse(content=result, status_code=403)
+    else:
+        response = JSONResponse(content=result, status_code=200)
+    response.set_cookie("device_id", result["device_id"], max_age=60*60*24*365)
+    return response
+
+
+@app.post("/auth/login", tags=["Auth"])
+async def login(req: Request, db: Session = Depends(get_db)):
+    body = await req.json()
+    result = login_user(
+        email    = body.get("email"),
+        password = body.get("password"),
+        request  = req,
+        db       = db,
+    )
+    if not result["success"]:
+        response = JSONResponse(content=result, status_code=401)
+    else:
+        response = JSONResponse(content=result, status_code=200)
+    response.set_cookie("device_id", result["device_id"], max_age=60*60*24*365)
+    return response
 
 # ─────────────────────────────────────────────
 # Serve frontend (Day 3)

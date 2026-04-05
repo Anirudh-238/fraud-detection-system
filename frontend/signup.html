@@ -3,15 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signup Check — FraudShield</title>
+  <title>Register — FraudShield</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-wrap {
+      min-height: calc(100vh - 57px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+    .auth-box { width: 100%; max-width: 420px; }
+    .auth-header { margin-bottom: 2rem; text-align: center; }
+    .auth-header .module-tag {
+      font-size: 0.68rem; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 0.5rem;
+    }
+    .auth-header h1 {
+      font-family: var(--display); font-size: 1.8rem; font-weight: 800;
+      color: var(--text-bright); letter-spacing: -0.03em;
+    }
+    .auth-header p { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.4rem; }
+    .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--text-dim); }
+    .auth-footer a { color: var(--blue); text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+    .verdict {
+      border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1.25rem;
+      font-size: 0.82rem; animation: slideDown 0.25s ease; display: none;
+    }
+    .verdict.allow  { background: var(--green-dim); border: 1px solid var(--green); color: var(--green); }
+    .verdict.review { background: rgba(245,166,35,0.08); border: 1px solid var(--amber); color: var(--amber); }
+    .verdict.block  { background: var(--red-dim); border: 1px solid var(--red); color: var(--red); }
+    .verdict-title  { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.88rem; }
+    .verdict-score  { font-size: 0.72rem; opacity: 0.8; margin-top: 0.4rem; }
+    .verdict-flags  { margin-top: 0.5rem; font-size: 0.72rem; opacity: 0.8; }
+    .verdict-flags li { margin-left: 1rem; margin-top: 0.2rem; }
+    .password-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.3rem; }
+  </style>
 </head>
 <body>
-
 <nav class="nav">
-  <a class="nav-logo" href="index.html">
-    <span class="dot"></span>FraudShield
-  </a>
+  <a class="nav-logo" href="index.html"><span class="dot"></span>FraudShield</a>
   <ul class="nav-links">
     <li><a href="login.html">Login</a></li>
     <li><a href="signup.html" class="active">Signup</a></li>
@@ -20,208 +50,114 @@
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
 </nav>
-
-<div class="page">
-  <div class="page-header">
-    <div class="module-tag">Module 02 / Identity Theft</div>
-    <h1>Signup Check</h1>
-    <p>Evaluate a new account registration for synthetic identity signals.</p>
-  </div>
-
-  <div class="presets">
-    <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Clean signup</button>
-    <button class="preset-btn fraud" onclick="fillPreset('dup_ssn')">⚠ Duplicate SSN</button>
-    <button class="preset-btn fraud" onclick="fillPreset('disposable')">⚠ Disposable email</button>
-    <button class="preset-btn fraud" onclick="fillPreset('farm')">⚠ Account farm</button>
-  </div>
-
-  <form id="signupForm">
-    <div class="card">
-      <div class="card-title">Registration Details</div>
-      <div class="field-row">
-        <div class="field">
-          <label>Full Name</label>
-          <input type="text" id="full_name" placeholder="Jane Doe" required>
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="jane@example.com" required>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Date of Birth</label>
-          <input type="date" id="date_of_birth" required>
-        </div>
-        <div class="field">
-          <label>SSN (last 4 digits)</label>
-          <input type="text" id="ssn_last4" placeholder="1234" maxlength="4" pattern="\d{4}" required>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>IP Address</label>
-          <input type="text" id="ip_address" placeholder="203.0.113.1" required>
-        </div>
-        <div class="field">
-          <label>Phone Number</label>
-          <input type="text" id="phone_number" placeholder="555-0100">
-        </div>
-      </div>
+<div class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="module-tag">Module 02 / Identity Theft</div>
+      <h1>Create account</h1>
+      <p>Fraud checks run silently in the background</p>
     </div>
-
     <div class="card">
-      <div class="card-title">Pre-computed Signals <span style="color:var(--text-dim);font-size:0.7em;font-weight:400">(from your DB lookup)</span></div>
-
-      <div class="toggle-field">
-        <label>Email already seen in system</label>
-        <label class="toggle">
-          <input type="checkbox" id="email_seen_before">
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="full_name" placeholder="Jane Doe" required autofocus>
       </div>
-      <div class="toggle-field">
-        <label>SSN (last 4) already registered</label>
-        <label class="toggle">
-          <input type="checkbox" id="ssn_seen_before">
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
       </div>
-      <div class="toggle-field">
-        <label>Name / DOB mismatch detected</label>
-        <label class="toggle">
-          <input type="checkbox" id="name_dob_mismatch">
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+        <div class="password-hint">Minimum 8 characters</div>
       </div>
-      <div class="field" style="margin-top:0.75rem">
-        <label>Accounts from same IP</label>
-        <input type="number" id="accounts_from_ip" value="1" min="0" max="100">
-      </div>
+      <button class="btn-submit" id="submitBtn" onclick="doRegister()">
+        Create Account →
+      </button>
     </div>
-
-    <button type="submit" class="btn-submit" id="submitBtn">
-      Run Fraud Check →
-    </button>
-  </form>
-
-  <div id="result" style="display:none"></div>
-  <div id="errorMsg" style="display:none"></div>
+    <div class="verdict" id="verdict">
+      <div class="verdict-title" id="verdictTitle"></div>
+      <div id="verdictMsg"></div>
+      <div class="verdict-score" id="verdictScore"></div>
+      <ul class="verdict-flags" id="verdictFlags"></ul>
+    </div>
+    <div class="auth-footer">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+  </div>
 </div>
-
 <script>
 const API = 'http://127.0.0.1:8000';
 
-document.getElementById('date_of_birth').value = '1990-06-15';
+async function doRegister() {
+  const full_name = document.getElementById('full_name').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const password  = document.getElementById('password').value;
+  const btn       = document.getElementById('submitBtn');
 
-const PRESETS = {
-  clean: {
-    full_name: 'Sarah Chen', email: 'sarah.chen@gmail.com', date_of_birth: '1988-03-22',
-    ssn_last4: '7841', ip_address: '73.162.5.200', phone_number: '555-0182',
-    email_seen_before: false, ssn_seen_before: false,
-    name_dob_mismatch: false, accounts_from_ip: 1,
-  },
-  dup_ssn: {
-    full_name: 'John Smith', email: 'jsmith2024@gmail.com', date_of_birth: '1975-11-01',
-    ssn_last4: '0000', ip_address: '10.0.0.5', phone_number: '555-0100',
-    email_seen_before: false, ssn_seen_before: true,
-    name_dob_mismatch: true, accounts_from_ip: 2,
-  },
-  disposable: {
-    full_name: 'Bob Test', email: 'freeaccount@mailinator.com', date_of_birth: '2000-01-01',
-    ssn_last4: '1234', ip_address: '198.51.100.9', phone_number: '',
-    email_seen_before: false, ssn_seen_before: false,
-    name_dob_mismatch: false, accounts_from_ip: 4,
-  },
-  farm: {
-    full_name: 'Alice Williams', email: 'alice_w99@tempmail.xyz', date_of_birth: '1995-07-14',
-    ssn_last4: '9999', ip_address: '203.0.113.50', phone_number: '',
-    email_seen_before: true, ssn_seen_before: true,
-    name_dob_mismatch: true, accounts_from_ip: 9,
-  },
-};
-
-function fillPreset(key) {
-  const p = PRESETS[key];
-  Object.entries(p).forEach(([k, v]) => {
-    const el = document.getElementById(k);
-    if (!el) return;
-    if (el.type === 'checkbox') el.checked = v;
-    else el.value = v;
-  });
-}
-
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  const resultEl = document.getElementById('result');
-  const errorEl  = document.getElementById('errorMsg');
+  if (!full_name || !email || !password) return;
+  if (password.length < 8) {
+    showVerdict({ action: 'block', message: 'Password must be at least 8 characters.', fraud_score: 0, flags: [] });
+    return;
+  }
 
   btn.disabled = true;
-  btn.textContent = 'Analyzing...';
-  resultEl.style.display = 'none';
-  errorEl.style.display  = 'none';
-
-  const body = {
-    email:             document.getElementById('email').value,
-    full_name:         document.getElementById('full_name').value,
-    date_of_birth:     document.getElementById('date_of_birth').value,
-    ssn_last4:         document.getElementById('ssn_last4').value,
-    ip_address:        document.getElementById('ip_address').value,
-    phone_number:      document.getElementById('phone_number').value || null,
-    email_seen_before: document.getElementById('email_seen_before').checked,
-    ssn_seen_before:   document.getElementById('ssn_seen_before').checked,
-    name_dob_mismatch: document.getElementById('name_dob_mismatch').checked,
-    accounts_from_ip:  parseInt(document.getElementById('accounts_from_ip').value) || 0,
-  };
+  btn.textContent = 'Creating account...';
+  hideVerdict();
 
   try {
-    const res = await fetch(`${API}/check/signup`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ full_name, email, password }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
     const data = await res.json();
-    renderResult(resultEl, data);
-    resultEl.style.display = 'block';
+    showVerdict(data);
   } catch (err) {
-    errorEl.innerHTML = `<div class="error-msg">⚠ ${err.message}<br><small>Make sure the FastAPI server is running at ${API}</small></div>`;
-    errorEl.style.display = 'block';
+    showError('Could not reach server. Is FastAPI running?');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Run Fraud Check →';
+    btn.textContent = 'Create Account →';
   }
-});
-
-function renderResult(el, data) {
-  const action = data.action.toLowerCase();
-  const pct    = data.fraud_score * 100;
-  const score  = pct.toFixed(1);
-
-  const flagsHtml = data.rule_flags.length
-    ? data.rule_flags.map(f => `<div class="flag-item">${f}</div>`).join('')
-    : `<div class="no-flags">No rule violations detected</div>`;
-
-  el.className = `result ${action}`;
-  el.innerHTML = `
-    <div class="result-header">
-      <span class="action-badge">${data.action.toUpperCase()}</span>
-      <span style="font-size:0.78rem;color:var(--text-dim)">
-        ${action === 'block' ? '🚫 Registration blocked' : action === 'review' ? '🔍 Manual review required' : '✓ Registration allowed'}
-      </span>
-      <div class="result-score">Fraud Score <span>${score}%</span></div>
-    </div>
-    <div class="result-body">
-      <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>
-      <div class="flags-title">Rule Engine Flags (${data.rule_flags.length})</div>
-      ${flagsHtml}
-      <div class="result-meta">
-        <div>Module <span>${data.module}</span></div>
-        <div>Request ID <span>#${data.request_id}</span></div>
-        <div>ML Score <span>${data.fraud_score}</span></div>
-      </div>
-    </div>`;
 }
+
+function showVerdict(data) {
+  const el    = document.getElementById('verdict');
+  const title = document.getElementById('verdictTitle');
+  const msg   = document.getElementById('verdictMsg');
+  const score = document.getElementById('verdictScore');
+  const flags = document.getElementById('verdictFlags');
+  const action = data.action;
+  const pct    = ((data.fraud_score || 0) * 100).toFixed(1);
+  el.className = `verdict ${action}`;
+  if (action === 'allow')       title.textContent = '✓ Account created!';
+  else if (action === 'review') title.textContent = '⚠ Account created — flagged for review';
+  else                          title.textContent = '✗ Registration blocked';
+  msg.textContent   = data.message;
+  score.textContent = data.fraud_score ? `Fraud score: ${pct}%` : '';
+  flags.innerHTML   = '';
+  (data.flags || []).forEach(f => {
+    const li = document.createElement('li');
+    li.textContent = f;
+    flags.appendChild(li);
+  });
+  el.style.display = 'block';
+}
+
+function hideVerdict() { document.getElementById('verdict').style.display = 'none'; }
+
+function showError(msg) {
+  const el = document.getElementById('verdict');
+  el.className = 'verdict block';
+  document.getElementById('verdictTitle').textContent = '✗ Error';
+  document.getElementById('verdictMsg').textContent   = msg;
+  document.getElementById('verdictScore').textContent = '';
+  document.getElementById('verdictFlags').innerHTML   = '';
+  el.style.display = 'block';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
 </script>
 </body>
 </html>
