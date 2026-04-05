@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Check — FraudShield</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <span class="dot"></span>FraudShield
+  </a>
+  <ul class="nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html">Signup</a></li>
+    <li><a href="payment.html" class="active">Payment</a></li>
+    <li><a href="promo.html">Promo</a></li>
+    <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="module-tag">Module 03 / Payment Fraud</div>
+    <h1>Payment Check</h1>
+    <p>Analyze a checkout transaction for carding, velocity abuse, and cross-border fraud.</p>
+  </div>
+
+  <div class="presets">
+    <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Normal purchase</button>
+    <button class="preset-btn fraud" onclick="fillPreset('carding')">⚠ Carding pattern</button>
+    <button class="preset-btn fraud" onclick="fillPreset('velocity')">⚠ Order velocity</button>
+    <button class="preset-btn fraud" onclick="fillPreset('digital')">⚠ Digital goods risk</button>
+  </div>
+
+  <form id="paymentForm">
+    <div class="card">
+      <div class="card-title">Order Details</div>
+      <div class="field-row">
+        <div class="field">
+          <label>User ID</label>
+          <input type="text" id="user_id" placeholder="u_042" required>
+        </div>
+        <div class="field">
+          <label>Order ID</label>
+          <input type="text" id="order_id" placeholder="ord_9981" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Amount (USD)</label>
+          <input type="number" id="amount_usd" placeholder="99.99" step="0.01" min="0.01" required>
+        </div>
+        <div class="field">
+          <label>Card BIN (first 6 digits)</label>
+          <input type="text" id="card_bin" placeholder="411111" maxlength="6" pattern="\d{6}" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="buyer@example.com" required>
+        </div>
+        <div class="field">
+          <label>IP Address</label>
+          <input type="text" id="ip_address" placeholder="203.0.113.1" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Geography</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Billing Country</label>
+          <input type="text" id="billing_country" placeholder="US" maxlength="2" required>
+        </div>
+        <div class="field">
+          <label>Shipping Country</label>
+          <input type="text" id="shipping_country" placeholder="US" maxlength="2" required>
+        </div>
+      </div>
+      <div class="toggle-field">
+        <label>Billing address matches shipping address</label>
+        <label class="toggle">
+          <input type="checkbox" id="address_match" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Velocity & Account Signals</div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>Cards used (24h)</label>
+          <input type="number" id="cards_used_24h" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Orders (24h)</label>
+          <input type="number" id="orders_24h" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Account age (days)</label>
+          <input type="number" id="account_age_days" value="365" min="0">
+        </div>
+      </div>
+      <div class="toggle-field">
+        <label>Digital goods (no physical shipping)</label>
+        <label class="toggle">
+          <input type="checkbox" id="is_digital_goods">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submitBtn">
+      Run Fraud Check →
+    </button>
+  </form>
+
+  <div id="result" style="display:none"></div>
+  <div id="errorMsg" style="display:none"></div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+
+const PRESETS = {
+  clean: {
+    user_id: 'u_001', order_id: 'ord_1001', amount_usd: 49.99, card_bin: '411111',
+    email: 'alice@gmail.com', ip_address: '72.14.192.5',
+    billing_country: 'US', shipping_country: 'US',
+    address_match: true, cards_used_24h: 1, orders_24h: 1,
+    account_age_days: 720, is_digital_goods: false,
+  },
+  carding: {
+    user_id: 'u_042', order_id: 'ord_9981', amount_usd: 1499.99, card_bin: '411111',
+    email: 'buyer@example.com', ip_address: '185.220.101.5',
+    billing_country: 'US', shipping_country: 'NG',
+    address_match: false, cards_used_24h: 5, orders_24h: 3,
+    account_age_days: 1, is_digital_goods: false,
+  },
+  velocity: {
+    user_id: 'u_199', order_id: 'ord_4422', amount_usd: 89.99, card_bin: '522100',
+    email: 'shopper@hotmail.com', ip_address: '203.0.113.30',
+    billing_country: 'US', shipping_country: 'US',
+    address_match: true, cards_used_24h: 3, orders_24h: 12,
+    account_age_days: 3, is_digital_goods: false,
+  },
+  digital: {
+    user_id: 'u_321', order_id: 'ord_7770', amount_usd: 2499.00, card_bin: '676110',
+    email: 'gamer@yopmail.com', ip_address: '91.108.4.100',
+    billing_country: 'DE', shipping_country: 'DE',
+    address_match: true, cards_used_24h: 4, orders_24h: 6,
+    account_age_days: 0, is_digital_goods: true,
+  },
+};
+
+function fillPreset(key) {
+  const p = PRESETS[key];
+  Object.entries(p).forEach(([k, v]) => {
+    const el = document.getElementById(k);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = v;
+    else el.value = v;
+  });
+}
+
+// Default
+fillPreset('clean');
+
+document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const resultEl = document.getElementById('result');
+  const errorEl  = document.getElementById('errorMsg');
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  resultEl.style.display = 'none';
+  errorEl.style.display  = 'none';
+
+  const body = {
+    user_id:          document.getElementById('user_id').value,
+    order_id:         document.getElementById('order_id').value,
+    amount_usd:       parseFloat(document.getElementById('amount_usd').value),
+    ip_address:       document.getElementById('ip_address').value,
+    card_bin:         document.getElementById('card_bin').value,
+    billing_country:  document.getElementById('billing_country').value.toUpperCase(),
+    shipping_country: document.getElementById('shipping_country').value.toUpperCase(),
+    email:            document.getElementById('email').value,
+    cards_used_24h:   parseInt(document.getElementById('cards_used_24h').value),
+    orders_24h:       parseInt(document.getElementById('orders_24h').value),
+    account_age_days: parseInt(document.getElementById('account_age_days').value),
+    is_digital_goods: document.getElementById('is_digital_goods').checked,
+    address_match:    document.getElementById('address_match').checked,
+  };
+
+  try {
+    const res = await fetch(`${API}/check/payment`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    renderResult(resultEl, data);
+    resultEl.style.display = 'block';
+  } catch (err) {
+    errorEl.innerHTML = `<div class="error-msg">⚠ ${err.message}<br><small>Make sure the FastAPI server is running at ${API}</small></div>`;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run Fraud Check →';
+  }
+});
+
+function renderResult(el, data) {
+  const action = data.action.toLowerCase();
+  const pct    = data.fraud_score * 100;
+  const score  = pct.toFixed(1);
+  const flagsHtml = data.rule_flags.length
+    ? data.rule_flags.map(f => `<div class="flag-item">${f}</div>`).join('')
+    : `<div class="no-flags">No rule violations detected</div>`;
+
+  el.className = `result ${action}`;
+  el.innerHTML = `
+    <div class="result-header">
+      <span class="action-badge">${data.action.toUpperCase()}</span>
+      <span style="font-size:0.78rem;color:var(--text-dim)">
+        ${action === 'block' ? '🚫 Payment declined' : action === 'review' ? '🔍 Payment queued for review' : '✓ Payment approved'}
+      </span>
+      <div class="result-score">Fraud Score <span>${score}%</span></div>
+    </div>
+    <div class="result-body">
+      <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>
+      <div class="flags-title">Rule Engine Flags (${data.rule_flags.length})</div>
+      ${flagsHtml}
+      <div class="result-meta">
+        <div>Module <span>${data.module}</span></div>
+        <div>Request ID <span>#${data.request_id}</span></div>
+        <div>ML Score <span>${data.fraud_score}</span></div>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

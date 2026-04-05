@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Dashboard — FraudShield</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Dashboard-only extras */
+    .dash-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filter-btn {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: all 0.12s;
+    }
+    .filter-btn.active         { background: var(--bg-3); color: var(--text); border-color: var(--border-lit); }
+    .filter-btn[data-f="block"].active  { border-color: var(--red);   color: var(--red); }
+    .filter-btn[data-f="review"].active { border-color: var(--amber); color: var(--amber); }
+    .filter-btn[data-f="allow"].active  { border-color: var(--green); color: var(--green); }
+
+    .clear-btn {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      padding: 0.3rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.12s;
+    }
+    .clear-btn:hover { border-color: var(--red-dim); color: var(--red); }
+
+    .module-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    /* Pulse animation for new alert counters */
+    @keyframes countUp {
+      from { transform: scale(1.4); }
+      to   { transform: scale(1); }
+    }
+    .count-pulse { animation: countUp 0.3s ease; }
+
+    /* Connected glow effect */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 1.25rem;
+      background: var(--bg-3);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .status-bar span { color: var(--text); }
+
+    /* Horizontal rule alerts by module */
+    .module-header {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      padding: 0.5rem 1.25rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+    }
+
+    /* Reconnect button */
+    .reconnect-btn {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--amber-dim);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--amber);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .reconnect-btn:hover { background: var(--amber-dim); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <span class="dot"></span>FraudShield
+  </a>
+  <ul class="nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html">Signup</a></li>
+    <li><a href="payment.html">Payment</a></li>
+    <li><a href="promo.html">Promo</a></li>
+    <li><a href="dashboard.html" class="dashboard-link active">⬡ Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="page wide">
+  <div class="dash-header">
+    <div class="page-header" style="margin-bottom:0">
+      <div class="module-tag">Live Feed</div>
+      <h1>Alert Dashboard</h1>
+      <p>Real-time fraud events streamed via SSE from the detection engine.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;padding-top:0.5rem">
+      <div id="connStatus" class="conn-indicator disconnected">
+        <span class="dot"></span><span id="connLabel">Connecting...</span>
+      </div>
+      <button class="reconnect-btn" id="reconnectBtn" onclick="connect()" style="display:none">
+        Reconnect
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="dash-grid">
+    <div class="stat-cell">
+      <div class="label">Total Events</div>
+      <div class="value" id="statTotal">0</div>
+    </div>
+    <div class="stat-cell">
+      <div class="label">Blocked</div>
+      <div class="value red" id="statBlock">0</div>
+    </div>
+    <div class="stat-cell">
+      <div class="label">Under Review</div>
+      <div class="value amber" id="statReview">0</div>
+    </div>
+    <div class="stat-cell">
+      <div class="label">Avg Score</div>
+      <div class="value" id="statAvg">—</div>
+    </div>
+  </div>
+
+  <!-- Alert stream -->
+  <div class="alert-stream">
+    <div class="alert-stream-header">
+      <h2>Live Event Stream</h2>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+        <div class="filter-bar" style="margin:0">
+          <button class="filter-btn active" data-f="all"    onclick="setFilter('all')">All</button>
+          <button class="filter-btn"        data-f="block"  onclick="setFilter('block')">Block</button>
+          <button class="filter-btn"        data-f="review" onclick="setFilter('review')">Review</button>
+          <button class="filter-btn"        data-f="allow"  onclick="setFilter('allow')">Allow</button>
+        </div>
+        <button class="clear-btn" onclick="clearAlerts()">Clear</button>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="statusText">Waiting for events...</span>
+      <span style="margin-left:auto">Showing: <span id="filterLabel">all actions</span></span>
+    </div>
+
+    <div class="alert-list" id="alertList">
+      <div class="empty-stream" id="emptyState">
+        <div class="icon">◈</div>
+        <div>No alerts yet</div>
+        <div style="font-size:0.72rem;margin-top:0.25rem">
+          Go to a demo page and run a fraud check to see live events here.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+
+let es = null;
+let alerts = [];
+let activeFilter = 'all';
+let scores = [];
+let reconnectTimer = null;
+
+// Stats
+const statTotal  = document.getElementById('statTotal');
+const statBlock  = document.getElementById('statBlock');
+const statReview = document.getElementById('statReview');
+const statAvg    = document.getElementById('statAvg');
+
+function updateStats() {
+  const total  = alerts.length;
+  const blocks = alerts.filter(a => a.action === 'block').length;
+  const reviews = alerts.filter(a => a.action === 'review').length;
+  const avg = scores.length ? (scores.reduce((a,b) => a+b, 0) / scores.length) : null;
+
+  animateCount(statTotal, total);
+  animateCount(statBlock, blocks);
+  animateCount(statReview, reviews);
+  statAvg.textContent = avg !== null ? (avg * 100).toFixed(0) + '%' : '—';
+}
+
+function animateCount(el, val) {
+  el.textContent = val;
+  el.classList.remove('count-pulse');
+  void el.offsetWidth;
+  el.classList.add('count-pulse');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.f === f);
+  });
+  document.getElementById('filterLabel').textContent =
+    f === 'all' ? 'all actions' : f + ' only';
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const list = document.getElementById('alertList');
+  const empty = document.getElementById('emptyState');
+  const filtered = activeFilter === 'all'
+    ? alerts
+    : alerts.filter(a => a.action === activeFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    empty.style.display = 'flex';
+    return;
+  }
+
+  list.innerHTML = filtered.map(a => {
+    const scoreNum = a.fraud_score * 100;
+    const scoreClass = scoreNum >= 85 ? 'high' : scoreNum >= 55 ? 'mid' : '';
+    const time = new Date(a.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const module = a.module.replace(/_/g, ' ');
+    return `
+      <div class="alert-item">
+        <span class="alert-action ${a.action}">${a.action.toUpperCase()}</span>
+        <div>
+          <div class="alert-summary">${escHtml(a.summary)}</div>
+          <div style="margin-top:0.2rem">
+            <span class="module-badge">${module}</span>
+          </div>
+        </div>
+        <span class="alert-score ${scoreClass}">${scoreNum.toFixed(0)}%</span>
+        <span class="alert-time">${time}</span>
+      </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function clearAlerts() {
+  alerts = [];
+  scores = [];
+  updateStats();
+  renderAlerts();
+}
+
+function addAlert(data) {
+  if (data.event_type === 'connected') {
+    setConnected(true);
+    document.getElementById('statusText').textContent = 'Stream connected — waiting for events...';
+    return;
+  }
+  if (data.event_type === 'ping') return;
+
+  alerts.unshift(data);   // newest first
+  if (alerts.length > 200) alerts.pop();
+  scores.push(data.fraud_score);
+  if (scores.length > 200) scores.shift();
+
+  updateStats();
+  renderAlerts();
+
+  const statusText = `Last event: ${data.action.toUpperCase()} — ${data.module.replace(/_/g,' ')} — score ${(data.fraud_score*100).toFixed(0)}%`;
+  document.getElementById('statusText').textContent = statusText;
+}
+
+function setConnected(ok) {
+  const el = document.getElementById('connStatus');
+  const lb = document.getElementById('connLabel');
+  const rb = document.getElementById('reconnectBtn');
+  el.className = `conn-indicator ${ok ? 'connected' : 'disconnected'}`;
+  lb.textContent = ok ? 'Connected' : 'Disconnected';
+  rb.style.display = ok ? 'none' : 'block';
+}
+
+function connect() {
+  if (es) { es.close(); es = null; }
+  clearTimeout(reconnectTimer);
+  setConnected(false);
+  document.getElementById('connLabel').textContent = 'Connecting...';
+  document.getElementById('reconnectBtn').style.display = 'none';
+
+  es = new EventSource(`${API}/dashboard/stream`);
+
+  es.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      addAlert(data);
+    } catch {}
+  };
+
+  es.onerror = () => {
+    setConnected(false);
+    document.getElementById('statusText').textContent = 'Connection lost. Retrying in 5s...';
+    es.close();
+    es = null;
+    reconnectTimer = setTimeout(connect, 5000);
+  };
+}
+
+// Boot
+connect();
+</script>
+</body>
+</html>

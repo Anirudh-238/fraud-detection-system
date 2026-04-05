@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promo Check — FraudShield</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <span class="dot"></span>FraudShield
+  </a>
+  <ul class="nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html">Signup</a></li>
+    <li><a href="payment.html">Payment</a></li>
+    <li><a href="promo.html" class="active">Promo</a></li>
+    <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="module-tag">Module 04 / Promotion Abuse</div>
+    <h1>Promo Check</h1>
+    <p>Detect coupon farming, multi-account abuse, and disposable identity clusters.</p>
+  </div>
+
+  <div class="presets">
+    <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Legit redemption</button>
+    <button class="preset-btn fraud" onclick="fillPreset('cluster')">⚠ IP cluster</button>
+    <button class="preset-btn fraud" onclick="fillPreset('multi')">⚠ Multi-redeem</button>
+    <button class="preset-btn fraud" onclick="fillPreset('full')">⚠ Full abuse combo</button>
+  </div>
+
+  <form id="promoForm">
+    <div class="card">
+      <div class="card-title">Redemption Request</div>
+      <div class="field-row">
+        <div class="field">
+          <label>User ID</label>
+          <input type="text" id="user_id" placeholder="u_777" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="user@example.com" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Promo Code</label>
+          <input type="text" id="promo_code" placeholder="SAVE50" required>
+        </div>
+        <div class="field">
+          <label>IP Address</label>
+          <input type="text" id="ip_address" placeholder="10.10.10.1" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Device ID</label>
+          <input type="text" id="device_id" placeholder="dev_xyz">
+        </div>
+        <div class="field">
+          <label>Email Domain (override)</label>
+          <input type="text" id="email_domain" placeholder="auto-detected">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cluster Signals</div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>Accounts (same IP)</label>
+          <input type="number" id="accounts_same_ip" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Accounts (same device)</label>
+          <input type="number" id="accounts_same_device" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Times redeemed (this user)</label>
+          <input type="number" id="redemptions_by_user" value="0" min="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Account age (days)</label>
+        <input type="number" id="account_age_days" value="180" min="0">
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submitBtn">
+      Run Fraud Check →
+    </button>
+  </form>
+
+  <div id="result" style="display:none"></div>
+  <div id="errorMsg" style="display:none"></div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+
+const PRESETS = {
+  clean: {
+    user_id: 'u_100', email: 'loyal.customer@gmail.com', promo_code: 'WELCOME10',
+    ip_address: '72.14.192.5', device_id: 'dev_iphone_x1',
+    email_domain: '', accounts_same_ip: 1, accounts_same_device: 1,
+    redemptions_by_user: 0, account_age_days: 365,
+  },
+  cluster: {
+    user_id: 'u_201', email: 'user201@gmail.com', promo_code: 'SAVE50',
+    ip_address: '10.10.10.1', device_id: 'dev_abc',
+    email_domain: '', accounts_same_ip: 9, accounts_same_device: 2,
+    redemptions_by_user: 0, account_age_days: 30,
+  },
+  multi: {
+    user_id: 'u_555', email: 'bargainhunter@outlook.com', promo_code: 'FREESHIP',
+    ip_address: '203.0.113.15', device_id: 'dev_laptop',
+    email_domain: '', accounts_same_ip: 2, accounts_same_device: 1,
+    redemptions_by_user: 4, account_age_days: 90,
+  },
+  full: {
+    user_id: 'u_999', email: 'freebie99@mailinator.com', promo_code: 'SAVE50',
+    ip_address: '10.10.10.1', device_id: 'dev_xyz',
+    email_domain: 'mailinator.com', accounts_same_ip: 8, accounts_same_device: 5,
+    redemptions_by_user: 3, account_age_days: 0,
+  },
+};
+
+function fillPreset(key) {
+  const p = PRESETS[key];
+  Object.entries(p).forEach(([k, v]) => {
+    const el = document.getElementById(k);
+    if (el) el.value = v;
+  });
+}
+
+fillPreset('clean');
+
+document.getElementById('promoForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const resultEl = document.getElementById('result');
+  const errorEl  = document.getElementById('errorMsg');
+
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  resultEl.style.display = 'none';
+  errorEl.style.display  = 'none';
+
+  const emailVal    = document.getElementById('email').value;
+  const domainField = document.getElementById('email_domain').value.trim();
+  const autoDomain  = emailVal.includes('@') ? emailVal.split('@')[1] : null;
+
+  const body = {
+    user_id:              document.getElementById('user_id').value,
+    email:                emailVal,
+    promo_code:           document.getElementById('promo_code').value,
+    ip_address:           document.getElementById('ip_address').value,
+    device_id:            document.getElementById('device_id').value || null,
+    email_domain:         domainField || autoDomain || null,
+    accounts_same_ip:     parseInt(document.getElementById('accounts_same_ip').value),
+    accounts_same_device: parseInt(document.getElementById('accounts_same_device').value),
+    redemptions_by_user:  parseInt(document.getElementById('redemptions_by_user').value),
+    account_age_days:     parseInt(document.getElementById('account_age_days').value),
+  };
+
+  try {
+    const res = await fetch(`${API}/check/promo`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    renderResult(resultEl, data);
+    resultEl.style.display = 'block';
+  } catch (err) {
+    errorEl.innerHTML = `<div class="error-msg">⚠ ${err.message}<br><small>Make sure the FastAPI server is running at ${API}</small></div>`;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run Fraud Check →';
+  }
+});
+
+function renderResult(el, data) {
+  const action = data.action.toLowerCase();
+  const pct    = data.fraud_score * 100;
+  const score  = pct.toFixed(1);
+  const flagsHtml = data.rule_flags.length
+    ? data.rule_flags.map(f => `<div class="flag-item">${f}</div>`).join('')
+    : `<div class="no-flags">No rule violations detected</div>`;
+
+  el.className = `result ${action}`;
+  el.innerHTML = `
+    <div class="result-header">
+      <span class="action-badge">${data.action.toUpperCase()}</span>
+      <span style="font-size:0.78rem;color:var(--text-dim)">
+        ${action === 'block' ? '🚫 Redemption blocked' : action === 'review' ? '🔍 Queued for review' : '✓ Redemption approved'}
+      </span>
+      <div class="result-score">Fraud Score <span>${score}%</span></div>
+    </div>
+    <div class="result-body">
+      <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>
+      <div class="flags-title">Rule Engine Flags (${data.rule_flags.length})</div>
+      ${flagsHtml}
+      <div class="result-meta">
+        <div>Module <span>${data.module}</span></div>
+        <div>Request ID <span>#${data.request_id}</span></div>
+        <div>ML Score <span>${data.fraud_score}</span></div>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

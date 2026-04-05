@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudShield — Fraud Detection System</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hero {
+      padding: 5rem 1.5rem 3rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--border-lit);
+    }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--border-lit);
+    }
+    .hero p {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+    }
+
+    .module-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .module-card {
+      background: var(--bg-2);
+      padding: 2rem;
+      text-decoration: none;
+      display: block;
+      transition: background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .module-card::after {
+      content: '→';
+      position: absolute;
+      right: 1.5rem; top: 50%;
+      transform: translateY(-50%) translateX(8px);
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      opacity: 0;
+      transition: all 0.2s;
+    }
+    .module-card:hover { background: var(--bg-3); }
+    .module-card:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+    .module-num {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+      font-family: var(--mono);
+    }
+    .module-title {
+      font-family: var(--display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .module-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .module-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .dashboard-card {
+      grid-column: 1 / -1;
+      background: var(--bg-2);
+      padding: 2rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      transition: background 0.15s;
+      border-top: 1px solid var(--border);
+    }
+    .dashboard-card:hover { background: var(--bg-3); }
+    .dashboard-card .module-title { color: var(--amber); margin-bottom: 0.25rem; }
+    .dashboard-card .cta {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--amber);
+      border: 1px solid var(--amber-dim);
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: background 0.15s;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .dashboard-card:hover .cta { background: var(--amber-dim); }
+
+    .stack-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .stack-badge {
+      font-size: 0.68rem;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    @media (max-width: 580px) {
+      .module-grid { grid-template-columns: 1fr; }
+      .dashboard-card { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html">
+    <span class="dot"></span>FraudShield
+  </a>
+  <ul class="nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html">Signup</a></li>
+    <li><a href="payment.html">Payment</a></li>
+    <li><a href="promo.html">Promo</a></li>
+    <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Fraud Detection System v1.0</div>
+  <h1>Stop fraud <em>before</em><br>it costs you.</h1>
+  <p>
+    A 3-layer detection engine combining deterministic rules with XGBoost ML models
+    across 4 fraud modules. Real-time scoring, live SSE alert streaming.
+  </p>
+  <div class="stack-badges">
+    <span class="stack-badge">Python 3.14</span>
+    <span class="stack-badge">FastAPI</span>
+    <span class="stack-badge">XGBoost</span>
+    <span class="stack-badge">scikit-learn</span>
+    <span class="stack-badge">SSE</span>
+    <span class="stack-badge">Pydantic</span>
+  </div>
+</div>
+
+<div class="module-grid">
+  <a class="module-card" href="login.html">
+    <span class="module-icon">🔐</span>
+    <div class="module-num">Module 01</div>
+    <div class="module-title">Account Takeover</div>
+    <div class="module-desc">Detect credential stuffing, impossible travel, new-device anomalies, and brute-force patterns on login attempts.</div>
+  </a>
+  <a class="module-card" href="signup.html">
+    <span class="module-icon">🪪</span>
+    <div class="module-num">Module 02</div>
+    <div class="module-title">Identity Theft</div>
+    <div class="module-desc">Catch synthetic identities, SSN reuse, disposable email domains, and account farms on new registrations.</div>
+  </a>
+  <a class="module-card" href="payment.html">
+    <span class="module-icon">💳</span>
+    <div class="module-num">Module 03</div>
+    <div class="module-title">Payment Fraud</div>
+    <div class="module-desc">Flag carding, card velocity abuse, cross-border mismatches, digital goods risk, and new-account high-value orders.</div>
+  </a>
+  <a class="module-card" href="promo.html">
+    <span class="module-icon">🎟</span>
+    <div class="module-num">Module 04</div>
+    <div class="module-title">Promo Abuse</div>
+    <div class="module-desc">Spot coupon farming via IP/device clusters, multi-redemption velocity, and throwaway account patterns.</div>
+  </a>
+
+  <a class="dashboard-card" href="dashboard.html">
+    <div>
+      <div class="module-title">⬡ Live Alert Dashboard</div>
+      <div class="module-desc">SSE-powered real-time stream showing all fraud events as they're detected. Filter by action, watch scores and flags live.</div>
+    </div>
+    <div class="cta">Open Dashboard →</div>
+  </a>
+</div>
+
+</body>
+</html>
