@@ -3,56 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FraudShield — Fraud Detection System</title>
+  <title>FraudShield — Real-Time Fraud Detection API</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .hero {
-      padding: 5rem 1.5rem 3rem;
-      max-width: 720px;
+    /* ── Landing-specific styles ── */
+
+    /* Hero */
+    .hero-section {
+      padding: 7rem 2rem 5rem;
+      max-width: 1100px;
       margin: 0 auto;
+      position: relative;
     }
     .hero-eyebrow {
-      font-size: 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.2em;
       color: var(--text-dim);
-      margin-bottom: 1.25rem;
+      border: 1px solid var(--border-lit);
+      border-radius: 20px;
+      padding: 0.35rem 0.9rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-eyebrow .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s infinite;
+    }
+    .hero-section h1 {
+      font-family: var(--display);
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .hero-section h1 .accent {
+      color: transparent;
+      -webkit-text-stroke: 1px var(--border-lit);
+      position: relative;
+    }
+    .hero-section h1 .accent-red {
+      color: var(--red);
+      text-shadow: 0 0 40px rgba(232,57,74,0.3);
+    }
+    .hero-section p.hero-sub {
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.75;
+      max-width: 560px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .btn-primary {
+      padding: 0.75rem 1.75rem;
+      background: var(--text-bright);
+      color: var(--bg);
+      border: none;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s;
+    }
+    .btn-primary:hover {
+      background: var(--blue);
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(74,168,255,0.3);
+    }
+    .btn-secondary {
+      padding: 0.75rem 1.75rem;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-lit);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--text-dim);
+      color: var(--text-bright);
+      background: var(--bg-3);
+    }
+
+    /* Hero background grid */
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 60% 80% at 80% 50%, black 0%, transparent 100%);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    /* Stat ticker */
+    .stat-ticker {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+    .ticker-item {
+      padding: 0 2rem;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .ticker-item:first-child { border-left: none; padding-left: 0; }
+    .ticker-item:last-child { border-right: none; }
+    .ticker-num {
+      font-family: var(--display);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .ticker-num .unit { font-size: 1.2rem; color: var(--text-dim); }
+    .ticker-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+
+    /* How it works */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    .section-eyebrow {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
-    .hero-eyebrow::before {
+    .section-eyebrow::before {
       content: '';
       display: block;
       width: 24px; height: 1px;
       background: var(--border-lit);
     }
-    .hero h1 {
+    .section h2 {
       font-family: var(--display);
-      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-size: clamp(1.8rem, 4vw, 3rem);
       font-weight: 800;
       color: var(--text-bright);
-      letter-spacing: -0.04em;
-      line-height: 1.05;
-      margin-bottom: 1.25rem;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      max-width: 600px;
     }
-    .hero h1 em {
-      font-style: normal;
-      color: transparent;
-      -webkit-text-stroke: 1px var(--border-lit);
-    }
-    .hero p {
-      font-size: 0.95rem;
+    .section p.section-sub {
+      font-size: 0.88rem;
       color: var(--text-dim);
       line-height: 1.7;
       max-width: 520px;
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
 
-    .module-grid {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1.5rem 5rem;
+    /* 3-layer diagram */
+    .layers {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .layer-card {
+      background: var(--bg-2);
+      padding: 2rem;
+      position: relative;
+    }
+    .layer-num {
+      font-family: var(--display);
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--border-lit);
+      line-height: 1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.05em;
+    }
+    .layer-title {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .layer-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+    .layer-tag {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.65rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .layer-tag.rules  { background: var(--blue-dim);  color: var(--blue); }
+    .layer-tag.ml     { background: var(--green-dim); color: var(--green); }
+    .layer-tag.human  { background: var(--amber-dim); color: var(--amber); }
+
+    /* Module cards */
+    .module-grid-new {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1px;
@@ -61,101 +263,294 @@
       border-radius: 8px;
       overflow: hidden;
     }
-    .module-card {
+    .module-card-new {
       background: var(--bg-2);
       padding: 2rem;
       text-decoration: none;
       display: block;
       transition: background 0.15s;
       position: relative;
-      overflow: hidden;
     }
-    .module-card::after {
-      content: '→';
-      position: absolute;
-      right: 1.5rem; top: 50%;
-      transform: translateY(-50%) translateX(8px);
-      color: var(--text-dim);
-      font-size: 1.1rem;
-      opacity: 0;
-      transition: all 0.2s;
+    .module-card-new:hover { background: var(--bg-3); }
+    .module-icon-new {
+      width: 40px; height: 40px;
+      border-radius: 6px;
+      border: 1px solid var(--border-lit);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      background: var(--bg-3);
     }
-    .module-card:hover { background: var(--bg-3); }
-    .module-card:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
-
-    .module-num {
+    .module-num-new {
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.15em;
       color: var(--text-dim);
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.4rem;
       font-family: var(--mono);
     }
-    .module-title {
+    .module-title-new {
       font-family: var(--display);
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--text-bright);
       margin-bottom: 0.5rem;
       letter-spacing: -0.02em;
     }
-    .module-desc {
+    .module-desc-new {
       font-size: 0.78rem;
       color: var(--text-dim);
-      line-height: 1.6;
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
     }
-    .module-icon {
-      font-size: 1.75rem;
-      margin-bottom: 0.75rem;
-      display: block;
-    }
-
-    .dashboard-card {
-      grid-column: 1 / -1;
-      background: var(--bg-2);
-      padding: 2rem;
-      text-decoration: none;
+    .module-signals {
       display: flex;
-      align-items: center;
-      gap: 2rem;
-      transition: background 0.15s;
-      border-top: 1px solid var(--border);
-    }
-    .dashboard-card:hover { background: var(--bg-3); }
-    .dashboard-card .module-title { color: var(--amber); margin-bottom: 0.25rem; }
-    .dashboard-card .cta {
-      margin-left: auto;
-      font-size: 0.75rem;
-      color: var(--amber);
-      border: 1px solid var(--amber-dim);
-      padding: 0.5rem 1.25rem;
-      border-radius: 4px;
-      white-space: nowrap;
-      transition: background 0.15s;
-      font-family: var(--mono);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .dashboard-card:hover .cta { background: var(--amber-dim); }
-
-    .stack-badges {
-      display: flex;
-      gap: 0.5rem;
       flex-wrap: wrap;
-      margin-top: 1rem;
+      gap: 0.35rem;
     }
-    .stack-badge {
-      font-size: 0.68rem;
-      padding: 0.25rem 0.6rem;
+    .signal-tag {
+      font-size: 0.62rem;
+      padding: 0.2rem 0.5rem;
       border: 1px solid var(--border);
-      border-radius: 3px;
+      border-radius: 2px;
       color: var(--text-dim);
       font-family: var(--mono);
     }
+    .module-arrow {
+      position: absolute;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      color: var(--text-dim);
+      font-size: 1rem;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: all 0.2s;
+    }
+    .module-card-new:hover .module-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
 
-    @media (max-width: 580px) {
-      .module-grid { grid-template-columns: 1fr; }
-      .dashboard-card { flex-wrap: wrap; }
+    /* API snippet */
+    .api-section {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .api-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border-lit);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-3);
+    }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #ff5f57; }
+    .code-dot.y { background: #ffbd2e; }
+    .code-dot.g { background: #28ca41; }
+    .code-filename {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-left: 0.5rem;
+      font-family: var(--mono);
+    }
+    .code-block pre {
+      padding: 1.25rem;
+      font-size: 0.75rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-block pre .kw  { color: var(--blue); }
+    .code-block pre .str { color: var(--green); }
+    .code-block pre .num { color: var(--amber); }
+    .code-block pre .cm  { color: var(--text-dim); }
+    .code-block pre .key { color: #c79cff; }
+
+    /* Endpoints list */
+    .endpoint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .endpoint-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.85rem;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-family: var(--mono);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+    .endpoint-item:hover { border-color: var(--border-lit); }
+    .method-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+    .method-badge.post { background: var(--green-dim); color: var(--green); }
+    .method-badge.get  { background: var(--blue-dim);  color: var(--blue); }
+    .endpoint-path { color: var(--text-dim); }
+    .endpoint-path span { color: var(--text-bright); }
+
+    /* Dashboard CTA strip */
+    .cta-strip {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    .cta-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border-lit);
+      border-radius: 8px;
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(74,168,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-box h2 {
+      font-family: var(--display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .cta-box p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 400px;
+    }
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-2);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    footer p {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.12s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* Live demo ticker */
+    .live-bar {
+      background: rgba(61,220,132,0.05);
+      border: 1px solid var(--green-dim);
+      border-radius: 4px;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s 0.4s ease both;
+      max-width: 520px;
+      overflow: hidden;
+    }
+    .live-bar .live-label {
+      color: var(--green);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.65rem;
+      flex-shrink: 0;
+    }
+    .live-bar .live-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .stat-ticker { grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+      .ticker-item { padding: 1.25rem; border: none; }
+      .layers { grid-template-columns: 1fr; }
+      .module-grid-new { grid-template-columns: 1fr; }
+      .api-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .cta-box { flex-direction: column; }
+      .cta-buttons { width: 100%; }
+      .cta-buttons .btn-primary,
+      .cta-buttons .btn-secondary { text-align: center; justify-content: center; }
+      .hero-section h1 { font-size: 2.5rem; }
     }
   </style>
 </head>
@@ -170,61 +565,330 @@
     <li><a href="signup.html">Signup</a></li>
     <li><a href="payment.html">Payment</a></li>
     <li><a href="promo.html">Promo</a></li>
+    <li><a href="api-docs.html">API Docs</a></li>
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
 </nav>
 
-<div class="hero">
-  <div class="hero-eyebrow">Fraud Detection System v1.0</div>
-  <h1>Stop fraud <em>before</em><br>it costs you.</h1>
-  <p>
-    A 3-layer detection engine combining deterministic rules with XGBoost ML models
-    across 4 fraud modules. Real-time scoring, live SSE alert streaming.
+<!-- ── HERO ── -->
+<section class="hero-section">
+  <div class="hero-eyebrow">
+    <span class="live-dot"></span>
+    Real-Time Fraud Detection API — v1.0
+  </div>
+  <h1>Stop fraud <span class="accent-red">before</span><br>it costs you.</h1>
+  <p class="hero-sub">
+    A 3-layer detection engine combining deterministic rules with XGBoost ML — 
+    covering account takeover, identity theft, payment fraud, and promo abuse. 
+    Instant decisions. Zero friction for real users.
   </p>
-  <div class="stack-badges">
-    <span class="stack-badge">Python 3.14</span>
-    <span class="stack-badge">FastAPI</span>
-    <span class="stack-badge">XGBoost</span>
-    <span class="stack-badge">scikit-learn</span>
-    <span class="stack-badge">SSE</span>
-    <span class="stack-badge">Pydantic</span>
+
+  <!-- Live event ticker -->
+  <div class="live-bar" id="liveTicker">
+    <span class="live-label">Live</span>
+    <span class="live-text" id="liveText">Connecting to event stream...</span>
+  </div>
+
+  <div class="hero-ctas">
+    <a href="dashboard.html" class="btn-primary">⬡ Open Live Dashboard →</a>
+    <a href="api-docs.html" class="btn-secondary">API Reference</a>
+    <a href="payment.html" class="btn-secondary">Try a Demo</a>
+  </div>
+</section>
+
+<!-- ── STAT TICKER ── -->
+<div class="stat-ticker">
+  <div class="ticker-item">
+    <div class="ticker-num">4<span class="unit">x</span></div>
+    <div class="ticker-label">Fraud Modules</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-num">3</div>
+    <div class="ticker-label">Detection Layers</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-num">&lt;1<span class="unit">ms</span></div>
+    <div class="ticker-label">Rule Engine Latency</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-num">8K</div>
+    <div class="ticker-label">Training Samples</div>
   </div>
 </div>
 
-<div class="module-grid">
-  <a class="module-card" href="login.html">
-    <span class="module-icon">🔐</span>
-    <div class="module-num">Module 01</div>
-    <div class="module-title">Account Takeover</div>
-    <div class="module-desc">Detect credential stuffing, impossible travel, new-device anomalies, and brute-force patterns on login attempts.</div>
-  </a>
-  <a class="module-card" href="signup.html">
-    <span class="module-icon">🪪</span>
-    <div class="module-num">Module 02</div>
-    <div class="module-title">Identity Theft</div>
-    <div class="module-desc">Catch synthetic identities, SSN reuse, disposable email domains, and account farms on new registrations.</div>
-  </a>
-  <a class="module-card" href="payment.html">
-    <span class="module-icon">💳</span>
-    <div class="module-num">Module 03</div>
-    <div class="module-title">Payment Fraud</div>
-    <div class="module-desc">Flag carding, card velocity abuse, cross-border mismatches, digital goods risk, and new-account high-value orders.</div>
-  </a>
-  <a class="module-card" href="promo.html">
-    <span class="module-icon">🎟</span>
-    <div class="module-num">Module 04</div>
-    <div class="module-title">Promo Abuse</div>
-    <div class="module-desc">Spot coupon farming via IP/device clusters, multi-redemption velocity, and throwaway account patterns.</div>
-  </a>
+<!-- ── 3-LAYER ARCHITECTURE ── -->
+<section class="section">
+  <div class="section-eyebrow">How it works</div>
+  <h2>Three layers of protection, working in concert.</h2>
+  <p class="section-sub">
+    Every request passes through all three layers in sequence. Rules catch the obvious. 
+    ML catches the subtle. Humans review the edge cases.
+  </p>
 
-  <a class="dashboard-card" href="dashboard.html">
-    <div>
-      <div class="module-title">⬡ Live Alert Dashboard</div>
-      <div class="module-desc">SSE-powered real-time stream showing all fraud events as they're detected. Filter by action, watch scores and flags live.</div>
+  <div class="layers">
+    <div class="layer-card">
+      <div class="layer-num">01</div>
+      <div class="layer-title">Rule Engine</div>
+      <div class="layer-desc">
+        Deterministic checks that run in microseconds. Hard-coded thresholds for brute-force, 
+        impossible travel, disposable emails, IP velocity, and card abuse. Always consistent — 
+        the same input always produces the same decision.
+      </div>
+      <span class="layer-tag rules">Deterministic</span>
     </div>
-    <div class="cta">Open Dashboard →</div>
-  </a>
+    <div class="layer-card">
+      <div class="layer-num">02</div>
+      <div class="layer-title">XGBoost ML</div>
+      <div class="layer-desc">
+        Four independent gradient-boosted tree models — one per fraud module — trained on 
+        labeled synthetic data with realistic fraud ratios. Outputs a probability score 
+        between 0.0 and 1.0. Catches patterns rules can't express.
+      </div>
+      <span class="layer-tag ml">Probabilistic</span>
+    </div>
+    <div class="layer-card">
+      <div class="layer-num">03</div>
+      <div class="layer-title">Human-in-the-Loop</div>
+      <div class="layer-desc">
+        Live SSE dashboard streams every BLOCK and REVIEW event to fraud analysts in 
+        real time. Borderline cases get a human verdict. Full audit trail in SQLite. 
+        The system that real payment companies use.
+      </div>
+      <span class="layer-tag human">Real-Time SSE</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── MODULES ── -->
+<section class="section" style="padding-top:0">
+  <div class="section-eyebrow">Detection Modules</div>
+  <h2>Four modules. Every fraud vector covered.</h2>
+  <p class="section-sub">
+    Each module has its own rule set, its own trained ML model, and its own dedicated API endpoint.
+  </p>
+
+  <div class="module-grid-new">
+    <a class="module-card-new" href="login.html">
+      <div class="module-icon-new">🔐</div>
+      <div class="module-num-new">Module 01</div>
+      <div class="module-title-new">Account Takeover</div>
+      <div class="module-desc-new">
+        Detects credential stuffing, brute-force attacks, impossible travel between 
+        sessions, and new-device anomalies at login time.
+      </div>
+      <div class="module-signals">
+        <span class="signal-tag">failed_attempts</span>
+        <span class="signal-tag">country_changed</span>
+        <span class="signal-tag">new_device</span>
+        <span class="signal-tag">odd_hour</span>
+        <span class="signal-tag">ip_changed</span>
+      </div>
+      <span class="module-arrow">→</span>
+    </a>
+    <a class="module-card-new" href="signup.html">
+      <div class="module-icon-new">🪪</div>
+      <div class="module-num-new">Module 02</div>
+      <div class="module-title-new">Identity Theft</div>
+      <div class="module-desc-new">
+        Catches synthetic identities, SSN reuse, disposable email domains, name/DOB 
+        mismatches, and account farms registering from the same IP.
+      </div>
+      <div class="module-signals">
+        <span class="signal-tag">ssn_seen_before</span>
+        <span class="signal-tag">disposable_email</span>
+        <span class="signal-tag">accounts_from_ip</span>
+        <span class="signal-tag">name_dob_mismatch</span>
+      </div>
+      <span class="module-arrow">→</span>
+    </a>
+    <a class="module-card-new" href="payment.html">
+      <div class="module-icon-new">💳</div>
+      <div class="module-num-new">Module 03</div>
+      <div class="module-title-new">Payment Fraud</div>
+      <div class="module-desc-new">
+        Flags carding attacks, card velocity abuse, cross-border billing mismatches, 
+        digital goods risk combos, and high-value orders on brand-new accounts.
+      </div>
+      <div class="module-signals">
+        <span class="signal-tag">cards_used_24h</span>
+        <span class="signal-tag">country_mismatch</span>
+        <span class="signal-tag">account_age_days</span>
+        <span class="signal-tag">is_digital_goods</span>
+      </div>
+      <span class="module-arrow">→</span>
+    </a>
+    <a class="module-card-new" href="promo.html">
+      <div class="module-icon-new">🎟</div>
+      <div class="module-num-new">Module 04</div>
+      <div class="module-title-new">Promo Abuse</div>
+      <div class="module-desc-new">
+        Spots coupon farming via IP/device clusters, multi-redemption velocity, 
+        throwaway account patterns, and disposable identity indicators.
+      </div>
+      <div class="module-signals">
+        <span class="signal-tag">accounts_same_ip</span>
+        <span class="signal-tag">accounts_same_device</span>
+        <span class="signal-tag">redemptions_by_user</span>
+        <span class="signal-tag">account_age_days</span>
+      </div>
+      <span class="module-arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ── API SECTION ── -->
+<div class="api-section">
+  <div class="api-inner">
+    <div>
+      <div class="section-eyebrow">Developer API</div>
+      <h2>Integrate in minutes.</h2>
+      <p class="section-sub" style="margin-bottom:1.5rem">
+        Four REST endpoints. JSON in, decision out. Each response includes a fraud 
+        score, action (BLOCK / REVIEW / ALLOW), and all rule flags that fired.
+      </p>
+      <div class="endpoint-list">
+        <a href="api-docs.html" class="endpoint-item">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/check/<span>login</span></span>
+        </a>
+        <a href="api-docs.html" class="endpoint-item">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/check/<span>signup</span></span>
+        </a>
+        <a href="api-docs.html" class="endpoint-item">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/check/<span>payment</span></span>
+        </a>
+        <a href="api-docs.html" class="endpoint-item">
+          <span class="method-badge post">POST</span>
+          <span class="endpoint-path">/check/<span>promo</span></span>
+        </a>
+        <a href="dashboard.html" class="endpoint-item">
+          <span class="method-badge get">GET</span>
+          <span class="endpoint-path">/dashboard/<span>stream</span></span>
+        </a>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-dot r"></span>
+        <span class="code-dot y"></span>
+        <span class="code-dot g"></span>
+        <span class="code-filename">example.py</span>
+      </div>
+      <pre><span class="kw">import</span> requests
+
+<span class="cm"># Check a payment for fraud</span>
+response = requests.<span class="kw">post</span>(
+    <span class="str">"http://localhost:8000/check/payment"</span>,
+    json={
+        <span class="key">"user_id"</span>:          <span class="str">"u_042"</span>,
+        <span class="key">"order_id"</span>:         <span class="str">"ord_9981"</span>,
+        <span class="key">"amount_usd"</span>:       <span class="num">1499.99</span>,
+        <span class="key">"billing_country"</span>:  <span class="str">"US"</span>,
+        <span class="key">"shipping_country"</span>: <span class="str">"NG"</span>,
+        <span class="key">"cards_used_24h"</span>:   <span class="num">5</span>,
+        <span class="key">"account_age_days"</span>: <span class="num">1</span>,
+        <span class="key">"is_digital_goods"</span>: <span class="kw">True</span>,
+        <span class="cm"># ... other fields</span>
+    }
+)
+
+result = response.json()
+<span class="cm"># result = {</span>
+<span class="cm">#   "action": "block",</span>
+<span class="cm">#   "fraud_score": 0.94,</span>
+<span class="cm">#   "rule_flags": [</span>
+<span class="cm">#     "COUNTRY_MISMATCH: US → NG",</span>
+<span class="cm">#     "CARD_VELOCITY: 5 cards/24h",</span>
+<span class="cm">#     "DIGITAL_GOODS_RISK: new acct"</span>
+<span class="cm">#   ]</span>
+<span class="cm"># }</span>
+
+<span class="kw">if</span> result[<span class="str">"action"</span>] == <span class="str">"block"</span>:
+    decline_transaction()</pre>
+    </div>
+  </div>
 </div>
 
+<!-- ── CTA STRIP ── -->
+<div class="cta-strip">
+  <div class="cta-box">
+    <div>
+      <h2>See it working live.</h2>
+      <p>
+        Open the dashboard, then run one of the demo scenarios. Watch the fraud alert 
+        appear in real time — scored, flagged, and explained.
+      </p>
+    </div>
+    <div class="cta-buttons">
+      <a href="dashboard.html" class="btn-primary">⬡ Open Dashboard →</a>
+      <a href="payment.html" class="btn-secondary">Try Payment Demo</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div>
+    <div class="footer-logo"><span class="dot" style="width:6px;height:6px;background:var(--red);box-shadow:0 0 6px var(--red);border-radius:50%;animation:pulse 2s infinite"></span> FraudShield</div>
+    <p style="margin-top:0.35rem">B.Tech Final Year Project — Real-Time Fraud Detection System</p>
+  </div>
+  <div class="footer-links">
+    <a href="api-docs.html">API Docs</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="login.html">Demo: Login</a>
+    <a href="payment.html">Demo: Payment</a>
+  </div>
+</footer>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+
+// Connect to SSE and show latest event in hero ticker
+const liveText = document.getElementById('liveText');
+const DEMO_EVENTS = [
+  '🚫 BLOCKED — Login from RU after 9 failed attempts — score 97%',
+  '🔍 REVIEW  — Signup via mailinator.com, 5 accounts from same IP — score 71%',
+  '🚫 BLOCKED — $2,499 digital goods, account age 0 days — score 94%',
+  '✓  ALLOWED — Normal login from known device — score 4%',
+  '🚫 BLOCKED — Promo code redeemed 4× by same user — score 88%',
+  '🔍 REVIEW  — Country changed US→CN on new device — score 63%',
+];
+let demoIdx = 0;
+
+function startDemoTicker() {
+  liveText.textContent = DEMO_EVENTS[demoIdx % DEMO_EVENTS.length];
+  demoIdx++;
+}
+
+// Try to connect to real SSE
+try {
+  const es = new EventSource(`${API}/dashboard/stream`);
+  es.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.event_type === 'ping' || d.event_type === 'connected') return;
+      const icon = d.action === 'block' ? '🚫 BLOCKED' : d.action === 'review' ? '🔍 REVIEW' : '✓ ALLOWED';
+      liveText.textContent = `${icon} — ${d.summary}`;
+    } catch {}
+  };
+  es.onerror = () => {
+    es.close();
+    startDemoTicker();
+    setInterval(startDemoTicker, 3500);
+  };
+  // If no event in 2s, use demo ticker
+  setTimeout(() => {
+    if (liveText.textContent === 'Connecting to event stream...') {
+      startDemoTicker();
+      setInterval(startDemoTicker, 3500);
+    }
+  }, 2000);
+} catch (e) {
+  startDemoTicker();
+  setInterval(startDemoTicker, 3500);
+}
+</script>
 </body>
 </html>

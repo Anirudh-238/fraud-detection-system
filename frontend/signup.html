@@ -11,7 +11,7 @@
       display: flex; align-items: center; justify-content: center;
       padding: 2rem 1.5rem;
     }
-    .auth-box { width: 100%; max-width: 420px; }
+    .auth-box { width: 100%; max-width: 440px; }
     .auth-header { margin-bottom: 2rem; text-align: center; }
     .auth-header .module-tag {
       font-size: 0.68rem; text-transform: uppercase;
@@ -22,9 +22,22 @@
       color: var(--text-bright); letter-spacing: -0.03em;
     }
     .auth-header p { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.4rem; }
-    .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--text-dim); }
-    .auth-footer a { color: var(--blue); text-decoration: none; }
-    .auth-footer a:hover { text-decoration: underline; }
+
+    .presets {
+      display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    .preset-btn {
+      font-family: var(--mono); font-size: 0.68rem; padding: 0.3rem 0.65rem;
+      border-radius: 3px; border: 1px solid var(--border-lit);
+      background: transparent; color: var(--text-dim); cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.07em; transition: all 0.12s;
+    }
+    .preset-btn:hover { color: var(--text); background: var(--bg-3); }
+    .preset-btn.fraud { border-color: var(--red-dim); color: var(--red); }
+    .preset-btn.fraud:hover { background: var(--red-dim); border-color: var(--red); }
+    .preset-btn.legit { border-color: var(--green-dim); color: var(--green); }
+    .preset-btn.legit:hover { background: var(--green-dim); border-color: var(--green); }
+
     .verdict {
       border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1.25rem;
       font-size: 0.82rem; animation: slideDown 0.25s ease; display: none;
@@ -34,9 +47,27 @@
     .verdict.block  { background: var(--red-dim); border: 1px solid var(--red); color: var(--red); }
     .verdict-title  { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.88rem; }
     .verdict-score  { font-size: 0.72rem; opacity: 0.8; margin-top: 0.4rem; }
-    .verdict-flags  { margin-top: 0.5rem; font-size: 0.72rem; opacity: 0.8; }
-    .verdict-flags li { margin-left: 1rem; margin-top: 0.2rem; }
+    .verdict-flags  { margin-top: 0.5rem; font-size: 0.72rem; opacity: 0.9; list-style: none; }
+    .verdict-flags li { padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .verdict-flags li::before { content: '▸ '; opacity: 0.6; }
+    .score-bar-wrap {
+      height: 4px; background: rgba(255,255,255,0.08);
+      border-radius: 2px; overflow: hidden; margin: 0.6rem 0 0.2rem;
+    }
+    .score-bar { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.23,1,0.32,1); }
+    .verdict.allow  .score-bar { background: var(--green); }
+    .verdict.review .score-bar { background: var(--amber); }
+    .verdict.block  .score-bar { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
     .password-hint { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.3rem; }
+    .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--text-dim); }
+    .auth-footer a { color: var(--blue); text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -47,16 +78,26 @@
     <li><a href="signup.html" class="active">Signup</a></li>
     <li><a href="payment.html">Payment</a></li>
     <li><a href="promo.html">Promo</a></li>
+    <li><a href="api-docs.html">API Docs</a></li>
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
 </nav>
+
 <div class="auth-wrap">
   <div class="auth-box">
     <div class="auth-header">
-      <div class="module-tag">Module 02 / Identity Theft</div>
+      <div class="module-tag">Module 02 / Identity Theft Detection</div>
       <h1>Create account</h1>
-      <p>Fraud checks run silently in the background</p>
+      <p>Fraud checks run silently — try a preset to see the engine flag identity abuse</p>
     </div>
+
+    <div class="presets">
+      <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Legit signup</button>
+      <button class="preset-btn fraud" onclick="fillPreset('disposable')">⚠ Disposable email</button>
+      <button class="preset-btn fraud" onclick="fillPreset('farm')">⚠ Account farm</button>
+      <button class="preset-btn fraud" onclick="fillPreset('synthetic')">⚠ Synthetic identity</button>
+    </div>
+
     <div class="card">
       <div class="field">
         <label>Full Name</label>
@@ -75,19 +116,78 @@
         Create Account →
       </button>
     </div>
+
     <div class="verdict" id="verdict">
       <div class="verdict-title" id="verdictTitle"></div>
       <div id="verdictMsg"></div>
+      <div class="score-bar-wrap"><div class="score-bar" id="scoreBar" style="width:0%"></div></div>
       <div class="verdict-score" id="verdictScore"></div>
       <ul class="verdict-flags" id="verdictFlags"></ul>
     </div>
+
     <div class="auth-footer">
       Already have an account? <a href="login.html">Sign in</a>
     </div>
   </div>
 </div>
+
 <script>
 const API = 'http://127.0.0.1:8000';
+
+// Presets for /check/signup (identity theft module)
+const PRESETS = {
+  clean: {
+    full_name: 'Alice Johnson', email: 'alice.j@gmail.com', password: 'SecurePass123',
+    _signals: {
+      email: 'alice.j@gmail.com', full_name: 'Alice Johnson',
+      date_of_birth: '1992-06-15', ssn_last4: '4321',
+      ip_address: '72.14.192.5',
+      email_seen_before: false, ssn_seen_before: false,
+      name_dob_mismatch: false, accounts_from_ip: 1,
+    }
+  },
+  disposable: {
+    full_name: 'John Temp', email: 'user99@mailinator.com', password: 'TempPass123',
+    _signals: {
+      email: 'user99@mailinator.com', full_name: 'John Temp',
+      date_of_birth: '1990-01-01', ssn_last4: '0000',
+      ip_address: '203.0.113.5',
+      email_seen_before: false, ssn_seen_before: false,
+      name_dob_mismatch: false, accounts_from_ip: 2,
+    }
+  },
+  farm: {
+    full_name: 'Bot Account', email: 'bot7@gmail.com', password: 'FarmPass123',
+    _signals: {
+      email: 'bot7@gmail.com', full_name: 'Bot Account',
+      date_of_birth: '1988-03-10', ssn_last4: '1234',
+      ip_address: '10.10.10.1',
+      email_seen_before: false, ssn_seen_before: false,
+      name_dob_mismatch: false, accounts_from_ip: 8,
+    }
+  },
+  synthetic: {
+    full_name: 'Mike Smith', email: 'msmith99@yopmail.com', password: 'SynthPass123',
+    _signals: {
+      email: 'msmith99@yopmail.com', full_name: 'Mike Smith',
+      date_of_birth: '2010-01-01', ssn_last4: '9999',
+      ip_address: '185.220.101.5',
+      email_seen_before: false, ssn_seen_before: true,
+      name_dob_mismatch: true, accounts_from_ip: 5,
+    }
+  },
+};
+
+let currentPreset = null;
+
+function fillPreset(key) {
+  const p = PRESETS[key];
+  document.getElementById('full_name').value = p.full_name;
+  document.getElementById('email').value     = p.email;
+  document.getElementById('password').value  = p.password;
+  currentPreset = p._signals;
+  hideVerdict();
+}
 
 async function doRegister() {
   const full_name = document.getElementById('full_name').value.trim();
@@ -97,25 +197,34 @@ async function doRegister() {
 
   if (!full_name || !email || !password) return;
   if (password.length < 8) {
-    showVerdict({ action: 'block', message: 'Password must be at least 8 characters.', fraud_score: 0, flags: [] });
+    showVerdict({ action: 'block', message: 'Password must be at least 8 characters.', fraud_score: 0, rule_flags: [] });
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'Creating account...';
+  btn.textContent = 'Checking...';
   hideVerdict();
 
+  // If using a preset, hit /check/signup (fraud check only, no DB write)
+  // Otherwise hit /auth/register (real auth flow)
+  let url, body;
+  if (currentPreset && currentPreset.email === email) {
+    url  = `${API}/check/signup`;
+    body = currentPreset;
+  } else {
+    url  = `${API}/auth/register`;
+    body = { full_name, email, password };
+  }
+
   try {
-    const res = await fetch(`${API}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ full_name, email, password }),
+    const res  = await fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', body: JSON.stringify(body),
     });
     const data = await res.json();
     showVerdict(data);
   } catch (err) {
-    showError('Could not reach server. Is FastAPI running?');
+    showError('Could not reach server. Is FastAPI running on port 8000?');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Create Account →';
@@ -123,25 +232,29 @@ async function doRegister() {
 }
 
 function showVerdict(data) {
-  const el    = document.getElementById('verdict');
-  const title = document.getElementById('verdictTitle');
-  const msg   = document.getElementById('verdictMsg');
-  const score = document.getElementById('verdictScore');
-  const flags = document.getElementById('verdictFlags');
-  const action = data.action;
-  const pct    = ((data.fraud_score || 0) * 100).toFixed(1);
+  const el     = document.getElementById('verdict');
+  const action = data.action || (data.success === false ? 'block' : 'allow');
+  const score  = data.fraud_score || 0;
+  const pct    = (score * 100).toFixed(1);
+
   el.className = `verdict ${action}`;
+  const title = document.getElementById('verdictTitle');
   if (action === 'allow')       title.textContent = '✓ Account created!';
   else if (action === 'review') title.textContent = '⚠ Account created — flagged for review';
-  else                          title.textContent = '✗ Registration blocked';
-  msg.textContent   = data.message;
-  score.textContent = data.fraud_score ? `Fraud score: ${pct}%` : '';
-  flags.innerHTML   = '';
-  (data.flags || []).forEach(f => {
+  else                          title.textContent = '✗ Registration blocked by fraud engine';
+
+  document.getElementById('verdictMsg').textContent   = data.message || '';
+  document.getElementById('scoreBar').style.width     = pct + '%';
+  document.getElementById('verdictScore').textContent = score ? `Fraud score: ${pct}%` : '';
+
+  const flagsEl = document.getElementById('verdictFlags');
+  flagsEl.innerHTML = '';
+  (data.rule_flags || data.flags || []).forEach(f => {
     const li = document.createElement('li');
     li.textContent = f;
-    flags.appendChild(li);
+    flagsEl.appendChild(li);
   });
+
   el.style.display = 'block';
 }
 
@@ -150,8 +263,9 @@ function hideVerdict() { document.getElementById('verdict').style.display = 'non
 function showError(msg) {
   const el = document.getElementById('verdict');
   el.className = 'verdict block';
-  document.getElementById('verdictTitle').textContent = '✗ Error';
+  document.getElementById('verdictTitle').textContent = '✗ Connection Error';
   document.getElementById('verdictMsg').textContent   = msg;
+  document.getElementById('scoreBar').style.width     = '0%';
   document.getElementById('verdictScore').textContent = '';
   document.getElementById('verdictFlags').innerHTML   = '';
   el.style.display = 'block';

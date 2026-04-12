@@ -19,10 +19,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 
 from schemas import (
     LoginRequest, SignupRequest, PaymentRequest, PromoRequest,
@@ -33,11 +35,8 @@ from rule_engine import (
     check_payment_fraud, check_promo_abuse
 )
 from ml_engine import load_all_models, score_request
-
-from database import init_db, get_db
+from database import get_db, init_db
 from auth import register_user, login_user
-from sqlalchemy.orm import Session
-from fastapi import Depends
 
 # ─────────────────────────────────────────────
 # App setup
@@ -96,10 +95,41 @@ async def sse_event_generator(request: Request) -> AsyncGenerator[str, None]:
 
 @app.on_event("startup")
 async def startup_event():
-    print("\n[Startup] Loading ML models...")
-    load_all_models()
+    print("\n[Startup] Initialising database...")
     init_db()
-    print("[Startup] All models loaded. Server ready.\n")
+    print("[Startup] Loading ML models...")
+    load_all_models()
+    print("[Startup] All systems ready.\n")
+
+
+# ─────────────────────────────────────────────
+# Auth request bodies
+# ─────────────────────────────────────────────
+
+class LoginBody(BaseModel):
+    email: EmailStr
+    password: str
+
+class RegisterBody(BaseModel):
+    email: EmailStr
+    full_name: str
+    password: str
+
+
+# ─────────────────────────────────────────────
+# Auth routes  (/auth/login  /auth/register)
+# ─────────────────────────────────────────────
+
+@app.post("/auth/login", tags=["Auth"])
+async def auth_login(body: LoginBody, request: Request, db: Session = Depends(get_db)):
+    """Real login — verifies password, runs ATO fraud check, logs attempt."""
+    return login_user(body.email, body.password, request, db)
+
+
+@app.post("/auth/register", tags=["Auth"])
+async def auth_register(body: RegisterBody, request: Request, db: Session = Depends(get_db)):
+    """Real registration — identity theft check, creates account if not blocked."""
+    return register_user(body.email, body.full_name, body.password, request, db)
 
 
 # ─────────────────────────────────────────────
@@ -260,45 +290,6 @@ async def check_promo(req: PromoRequest):
 
     return response
 
-
-
-# ─────────────────────────────────────────────
-# Auth routes (Day 4)
-# ─────────────────────────────────────────────
-
-@app.post("/auth/register", tags=["Auth"])
-async def register(req: Request, db: Session = Depends(get_db)):
-    body = await req.json()
-    result = register_user(
-        email     = body.get("email"),
-        full_name = body.get("full_name"),
-        password  = body.get("password"),
-        request   = req,
-        db        = db,
-    )
-    if result["action"] == "block":
-        response = JSONResponse(content=result, status_code=403)
-    else:
-        response = JSONResponse(content=result, status_code=200)
-    response.set_cookie("device_id", result["device_id"], max_age=60*60*24*365)
-    return response
-
-
-@app.post("/auth/login", tags=["Auth"])
-async def login(req: Request, db: Session = Depends(get_db)):
-    body = await req.json()
-    result = login_user(
-        email    = body.get("email"),
-        password = body.get("password"),
-        request  = req,
-        db       = db,
-    )
-    if not result["success"]:
-        response = JSONResponse(content=result, status_code=401)
-    else:
-        response = JSONResponse(content=result, status_code=200)
-    response.set_cookie("device_id", result["device_id"], max_age=60*60*24*365)
-    return response
 
 # ─────────────────────────────────────────────
 # Serve frontend (Day 3)

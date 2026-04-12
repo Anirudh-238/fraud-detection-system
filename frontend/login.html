@@ -13,7 +13,7 @@
       justify-content: center;
       padding: 2rem 1.5rem;
     }
-    .auth-box { width: 100%; max-width: 420px; }
+    .auth-box { width: 100%; max-width: 440px; }
     .auth-header { margin-bottom: 2rem; text-align: center; }
     .auth-header .module-tag {
       font-size: 0.68rem; text-transform: uppercase;
@@ -24,9 +24,23 @@
       color: var(--text-bright); letter-spacing: -0.03em;
     }
     .auth-header p { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.4rem; }
-    .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--text-dim); }
-    .auth-footer a { color: var(--blue); text-decoration: none; }
-    .auth-footer a:hover { text-decoration: underline; }
+
+    /* Preset buttons */
+    .presets {
+      display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    .preset-btn {
+      font-family: var(--mono); font-size: 0.68rem; padding: 0.3rem 0.65rem;
+      border-radius: 3px; border: 1px solid var(--border-lit);
+      background: transparent; color: var(--text-dim); cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.07em; transition: all 0.12s;
+    }
+    .preset-btn:hover { color: var(--text); background: var(--bg-3); }
+    .preset-btn.fraud { border-color: var(--red-dim); color: var(--red); }
+    .preset-btn.fraud:hover { background: var(--red-dim); border-color: var(--red); }
+    .preset-btn.legit { border-color: var(--green-dim); color: var(--green); }
+    .preset-btn.legit:hover { background: var(--green-dim); border-color: var(--green); }
+
     .verdict {
       border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1.25rem;
       font-size: 0.82rem; animation: slideDown 0.25s ease; display: none;
@@ -36,9 +50,26 @@
     .verdict.block  { background: var(--red-dim); border: 1px solid var(--red); color: var(--red); }
     .verdict-title  { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.88rem; }
     .verdict-score  { font-size: 0.72rem; opacity: 0.8; margin-top: 0.4rem; }
-    .verdict-flags  { margin-top: 0.5rem; font-size: 0.72rem; opacity: 0.8; }
-    .verdict-flags li { margin-left: 1rem; margin-top: 0.2rem; }
-    .debug-toggle { text-align: center; margin-top: 2rem; }
+    .verdict-flags  { margin-top: 0.5rem; font-size: 0.72rem; opacity: 0.9; list-style: none; }
+    .verdict-flags li { padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .verdict-flags li::before { content: '▸ '; opacity: 0.6; }
+
+    /* Score bar */
+    .score-bar-wrap {
+      height: 4px; background: rgba(255,255,255,0.08);
+      border-radius: 2px; overflow: hidden; margin: 0.6rem 0 0.2rem;
+    }
+    .score-bar { height: 100%; border-radius: 2px; transition: width 0.6s cubic-bezier(0.23,1,0.32,1); }
+    .verdict.allow  .score-bar { background: var(--green); }
+    .verdict.review .score-bar { background: var(--amber); }
+    .verdict.block  .score-bar { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+    .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: var(--text-dim); }
+    .auth-footer a { color: var(--blue); text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    /* Debug panel */
+    .debug-toggle { text-align: center; margin-top: 1.5rem; }
     .debug-toggle button {
       background: none; border: 1px solid transparent; font-family: var(--mono);
       font-size: 0.68rem; color: var(--text-dim); cursor: pointer;
@@ -47,16 +78,22 @@
     }
     .debug-toggle button:hover { border-color: var(--border); color: var(--text); }
     .debug-panel {
-      display: none; margin-top: 1rem; background: var(--bg-3);
+      display: none; margin-top: 0.75rem; background: var(--bg-3);
       border: 1px solid var(--border); border-radius: 6px;
-      padding: 1rem; font-size: 0.72rem; color: var(--text-dim); text-align: left;
+      padding: 0.85rem; font-size: 0.72rem; color: var(--text-dim); text-align: left;
     }
     .debug-panel .row {
-      display: flex; justify-content: space-between;
-      padding: 0.25rem 0; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 0.3rem 0; border-bottom: 1px solid var(--border);
+      gap: 1rem;
     }
     .debug-panel .row:last-child { border: none; }
-    .debug-panel .row span { color: var(--text); }
+    .debug-panel .row span { color: var(--text); font-family: var(--mono); text-align: right; word-break: break-all; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -67,16 +104,26 @@
     <li><a href="signup.html">Signup</a></li>
     <li><a href="payment.html">Payment</a></li>
     <li><a href="promo.html">Promo</a></li>
+    <li><a href="api-docs.html">API Docs</a></li>
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
 </nav>
+
 <div class="auth-wrap">
   <div class="auth-box">
     <div class="auth-header">
-      <div class="module-tag">Module 01 / Account Takeover</div>
+      <div class="module-tag">Module 01 / Account Takeover Detection</div>
       <h1>Welcome back</h1>
-      <p>Sign in to your account</p>
+      <p>Fraud checks run silently — try a preset to see the engine in action</p>
     </div>
+
+    <!-- Presets -->
+    <div class="presets">
+      <button class="preset-btn legit" onclick="fillPreset('normal')">✓ Normal login</button>
+      <button class="preset-btn fraud" onclick="fillPreset('brute')">⚠ Brute force</button>
+      <button class="preset-btn fraud" onclick="fillPreset('travel')">⚠ Impossible travel</button>
+    </div>
+
     <div class="card">
       <div class="field">
         <label>Email</label>
@@ -88,48 +135,112 @@
       </div>
       <button class="btn-submit" id="submitBtn" onclick="doLogin()">Sign In →</button>
     </div>
+
     <div class="verdict" id="verdict">
       <div class="verdict-title" id="verdictTitle"></div>
       <div id="verdictMsg"></div>
+      <div class="score-bar-wrap"><div class="score-bar" id="scoreBar" style="width:0%"></div></div>
       <div class="verdict-score" id="verdictScore"></div>
       <ul class="verdict-flags" id="verdictFlags"></ul>
     </div>
+
     <div class="auth-footer">
       Don't have an account? <a href="signup.html">Create one</a>
     </div>
+
     <div class="debug-toggle">
       <button onclick="toggleDebug()">⬡ Show fraud engine signals</button>
       <div class="debug-panel" id="debugPanel">
         <div class="row">Fraud Score <span id="dbgScore">—</span></div>
         <div class="row">Final Action <span id="dbgAction">—</span></div>
-        <div class="row">Rule Flags <span id="dbgFlags">—</span></div>
+        <div class="row">Flags Fired <span id="dbgFlagCount">—</span></div>
+        <div class="row">API Endpoint <span id="dbgEndpoint">—</span></div>
       </div>
     </div>
   </div>
 </div>
+
 <script>
 const API = 'http://127.0.0.1:8000';
+
+// Presets — these map to the /check/login endpoint fields
+const PRESETS = {
+  normal: {
+    email: 'alice@gmail.com', password: 'password123',
+    // signals sent via /check/login directly
+    _signals: {
+      user_id: 'u_alice', email: 'alice@gmail.com',
+      ip_address: '72.14.192.5', user_agent: navigator.userAgent,
+      login_timestamp: new Date().toISOString(),
+      last_known_ip: '72.14.192.5', last_known_country: 'US',
+      current_country: 'US', failed_attempts: 0, new_device: false,
+    }
+  },
+  brute: {
+    email: 'victim@gmail.com', password: 'wrongpass',
+    _signals: {
+      user_id: 'u_victim', email: 'victim@gmail.com',
+      ip_address: '185.220.101.5', user_agent: 'python-requests/2.28',
+      login_timestamp: new Date().toISOString(),
+      last_known_ip: '72.14.192.5', last_known_country: 'US',
+      current_country: 'RU', failed_attempts: 9, new_device: true,
+    }
+  },
+  travel: {
+    email: 'bob@example.com', password: 'mypassword',
+    _signals: {
+      user_id: 'u_bob', email: 'bob@example.com',
+      ip_address: '1.180.241.5', user_agent: navigator.userAgent,
+      login_timestamp: new Date(Date.now() - 2*3600*1000).toISOString(),
+      last_known_ip: '104.18.2.1', last_known_country: 'US',
+      current_country: 'CN', failed_attempts: 2, new_device: true,
+    }
+  }
+};
+
+let currentPreset = null;
+
+function fillPreset(key) {
+  const p = PRESETS[key];
+  document.getElementById('email').value    = p.email;
+  document.getElementById('password').value = p.password;
+  currentPreset = p._signals;
+  hideVerdict();
+}
 
 async function doLogin() {
   const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const btn      = document.getElementById('submitBtn');
   if (!email || !password) return;
+
   btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  btn.textContent = 'Checking...';
   hideVerdict();
+
+  // If using a preset, hit /check/login with full signals
+  // If manual entry, hit /auth/login (real auth route)
+  let url, body;
+  if (currentPreset && currentPreset.email === email) {
+    url  = `${API}/check/login`;
+    body = currentPreset;
+    document.getElementById('dbgEndpoint').textContent = 'POST /check/login';
+  } else {
+    url  = `${API}/auth/login`;
+    body = { email, password };
+    document.getElementById('dbgEndpoint').textContent = 'POST /auth/login';
+  }
+
   try {
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
+    const res  = await fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', body: JSON.stringify(body),
     });
     const data = await res.json();
     showVerdict(data);
     updateDebug(data);
   } catch (err) {
-    showError('Could not reach server. Is FastAPI running?');
+    showError('Could not reach server. Is FastAPI running on port 8000?');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Sign In →';
@@ -137,25 +248,29 @@ async function doLogin() {
 }
 
 function showVerdict(data) {
-  const el    = document.getElementById('verdict');
-  const title = document.getElementById('verdictTitle');
-  const msg   = document.getElementById('verdictMsg');
-  const score = document.getElementById('verdictScore');
-  const flags = document.getElementById('verdictFlags');
-  const action = data.action;
-  const pct    = ((data.fraud_score || 0) * 100).toFixed(1);
+  const el     = document.getElementById('verdict');
+  const action = data.action || (data.success === false ? 'block' : 'allow');
+  const score  = data.fraud_score || 0;
+  const pct    = (score * 100).toFixed(1);
+
   el.className = `verdict ${action}`;
-  if (action === 'allow')       title.textContent = `✓ Welcome, ${data.user?.full_name || 'back'}!`;
-  else if (action === 'review') title.textContent = '⚠ Login allowed — activity flagged';
-  else                          title.textContent = '✗ Login blocked';
-  msg.textContent   = data.message;
-  score.textContent = `Fraud score: ${pct}%`;
-  flags.innerHTML   = '';
-  (data.flags || []).forEach(f => {
+  const title = document.getElementById('verdictTitle');
+  if (action === 'allow')       title.textContent = data.user ? `✓ Welcome, ${data.user.full_name || 'back'}!` : '✓ Login successful';
+  else if (action === 'review') title.textContent = '⚠ Login allowed — activity flagged for review';
+  else                          title.textContent = '✗ Login blocked by fraud engine';
+
+  document.getElementById('verdictMsg').textContent   = data.message || '';
+  document.getElementById('scoreBar').style.width     = pct + '%';
+  document.getElementById('verdictScore').textContent = `Fraud score: ${pct}%`;
+
+  const flagsEl = document.getElementById('verdictFlags');
+  flagsEl.innerHTML = '';
+  (data.rule_flags || data.flags || []).forEach(f => {
     const li = document.createElement('li');
     li.textContent = f;
-    flags.appendChild(li);
+    flagsEl.appendChild(li);
   });
+
   el.style.display = 'block';
 }
 
@@ -164,17 +279,18 @@ function hideVerdict() { document.getElementById('verdict').style.display = 'non
 function showError(msg) {
   const el = document.getElementById('verdict');
   el.className = 'verdict block';
-  document.getElementById('verdictTitle').textContent = '✗ Error';
+  document.getElementById('verdictTitle').textContent = '✗ Connection Error';
   document.getElementById('verdictMsg').textContent   = msg;
+  document.getElementById('scoreBar').style.width     = '0%';
   document.getElementById('verdictScore').textContent = '';
   document.getElementById('verdictFlags').innerHTML   = '';
   el.style.display = 'block';
 }
 
 function updateDebug(data) {
-  document.getElementById('dbgScore').textContent  = data.fraud_score ?? '—';
-  document.getElementById('dbgAction').textContent = (data.action || '—').toUpperCase();
-  document.getElementById('dbgFlags').textContent  = (data.flags || []).length + ' flags';
+  document.getElementById('dbgScore').textContent     = data.fraud_score ?? '—';
+  document.getElementById('dbgAction').textContent    = (data.action || '—').toUpperCase();
+  document.getElementById('dbgFlagCount').textContent = ((data.rule_flags || data.flags || []).length) + ' flags';
 }
 
 function toggleDebug() {

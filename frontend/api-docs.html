@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Reference — FraudShield</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* Sidebar */
+    .docs-sidebar {
+      background: var(--bg-2);
+      border-right: 1px solid var(--border);
+      padding: 2rem 0;
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+      overflow-y: auto;
+    }
+    .sidebar-section {
+      margin-bottom: 1.75rem;
+    }
+    .sidebar-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      padding: 0 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+    }
+    .sidebar-link:hover { color: var(--text); background: var(--bg-3); }
+    .sidebar-link.active { color: var(--text-bright); border-left-color: var(--blue); background: var(--bg-3); }
+    .sidebar-method {
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .sidebar-method.post { background: var(--green-dim); color: var(--green); }
+    .sidebar-method.get  { background: var(--blue-dim);  color: var(--blue); }
+
+    /* Main content */
+    .docs-main {
+      padding: 3rem 3rem 6rem;
+      max-width: 760px;
+    }
+    .docs-hero {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .docs-hero h1 {
+      font-family: var(--display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.04em;
+      margin-bottom: 0.75rem;
+    }
+    .docs-hero p {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 500px;
+    }
+    .base-url-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-3);
+      border: 1px solid var(--border-lit);
+      border-radius: 4px;
+      padding: 0.65rem 1rem;
+      margin-top: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+    .base-url-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .base-url-val { color: var(--blue); }
+
+    /* Endpoint sections */
+    .endpoint-section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 80px;
+    }
+    .endpoint-section + .endpoint-section {
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .ep-method {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .ep-method.POST { background: var(--green-dim); color: var(--green); }
+    .ep-method.GET  { background: var(--blue-dim);  color: var(--blue); }
+    .ep-path {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+    .ep-desc {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Section sub-heading */
+    .sub-heading {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 0.6rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Fields table */
+    .fields-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      font-size: 0.78rem;
+    }
+    .fields-table th {
+      background: var(--bg-3);
+      color: var(--text-dim);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    .fields-table td {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+    .fields-table tr:last-child td { border-bottom: none; }
+    .fields-table tr:hover td { background: var(--bg-3); }
+    .field-name { font-family: var(--mono); color: var(--blue); }
+    .field-type { font-family: var(--mono); color: var(--amber); font-size: 0.72rem; }
+    .field-req  {
+      display: inline-block;
+      font-size: 0.58rem;
+      padding: 0.1rem 0.3rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field-req.req  { background: var(--red-dim);   color: var(--red); }
+    .field-req.opt  { background: var(--bg-3);       color: var(--text-dim); }
+    .field-desc { font-size: 0.75rem; color: var(--text-dim); }
+
+    /* Code blocks */
+    .code-wrap {
+      background: var(--bg);
+      border: 1px solid var(--border-lit);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+    .code-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-3);
+    }
+    .code-lang {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+    .copy-btn {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.12s;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--border-lit); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green-dim); }
+    pre.code-content {
+      padding: 1.1rem;
+      margin: 0;
+      font-size: 0.74rem;
+      line-height: 1.7;
+      color: var(--text);
+      overflow-x: auto;
+    }
+    .kw  { color: var(--blue); }
+    .str { color: var(--green); }
+    .num { color: var(--amber); }
+    .cm  { color: var(--text-dim); }
+    .key { color: #c79cff; }
+    .val { color: var(--text-bright); }
+
+    /* Response example */
+    .response-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+    }
+    .resp-tab {
+      padding: 0.5rem 1rem;
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      border: none;
+      border-right: 1px solid var(--border);
+      background: var(--bg-3);
+      color: var(--text-dim);
+      transition: all 0.12s;
+    }
+    .resp-tab:last-child { border-right: none; }
+    .resp-tab.active { background: var(--bg-2); color: var(--text-bright); }
+    .resp-body {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      background: var(--bg);
+      padding: 1rem;
+      font-size: 0.74rem;
+      font-family: var(--mono);
+      line-height: 1.7;
+      display: none;
+      margin-bottom: 1.25rem;
+    }
+    .resp-body.active { display: block; }
+
+    /* Action decision box */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .decision-cell {
+      background: var(--bg-2);
+      padding: 1rem;
+    }
+    .decision-action {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 0.6rem;
+    }
+    .decision-action.block  { background: var(--red-dim);   color: var(--red); }
+    .decision-action.review { background: var(--amber-dim); color: var(--amber); }
+    .decision-action.allow  { background: var(--green-dim); color: var(--green); }
+    .decision-condition { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; }
+
+    @media (max-width: 700px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-sidebar { display: none; }
+      .docs-main { padding: 2rem 1.25rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html"><span class="dot"></span>FraudShield</a>
+  <ul class="nav-links">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="signup.html">Signup</a></li>
+    <li><a href="payment.html">Payment</a></li>
+    <li><a href="promo.html">Promo</a></li>
+    <li><a href="api-docs.html" class="active">API Docs</a></li>
+    <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="docs-layout">
+
+  <!-- Sidebar -->
+  <nav class="docs-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <a class="sidebar-link active" href="#overview">Introduction</a>
+      <a class="sidebar-link" href="#decisions">Decision Logic</a>
+      <a class="sidebar-link" href="#response">Response Format</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Endpoints</div>
+      <a class="sidebar-link" href="#login">
+        <span class="sidebar-method post">POST</span>/check/login
+      </a>
+      <a class="sidebar-link" href="#signup">
+        <span class="sidebar-method post">POST</span>/check/signup
+      </a>
+      <a class="sidebar-link" href="#payment">
+        <span class="sidebar-method post">POST</span>/check/payment
+      </a>
+      <a class="sidebar-link" href="#promo">
+        <span class="sidebar-method post">POST</span>/check/promo
+      </a>
+      <a class="sidebar-link" href="#stream">
+        <span class="sidebar-method get">GET</span>/dashboard/stream
+      </a>
+      <a class="sidebar-link" href="#health">
+        <span class="sidebar-method get">GET</span>/health
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Resources</div>
+      <a class="sidebar-link" href="dashboard.html">Live Dashboard →</a>
+      <a class="sidebar-link" href="http://127.0.0.1:8000/docs" target="_blank">Swagger UI →</a>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="docs-main">
+
+    <!-- Overview -->
+    <div id="overview" class="docs-hero">
+      <h1>API Reference</h1>
+      <p>
+        FraudShield exposes a REST API that runs every request through a 3-layer 
+        detection pipeline — deterministic rules, XGBoost ML scoring, and a live 
+        SSE dashboard for human review. Each endpoint returns a fraud score, 
+        a final action, and all rule flags that fired.
+      </p>
+      <div class="base-url-bar">
+        <span class="base-url-label">Base URL</span>
+        <span class="base-url-val">http://localhost:8000</span>
+      </div>
+    </div>
+
+    <!-- Decision logic -->
+    <div id="decisions" class="endpoint-section">
+      <div style="font-family:var(--display);font-size:1.4rem;font-weight:800;color:var(--text-bright);letter-spacing:-0.03em;margin-bottom:0.75rem">Decision Logic</div>
+      <p class="ep-desc">
+        Every response contains one of three actions. The rule engine always runs first — 
+        if it BLOCKs, the ML score cannot override it. The ML score can escalate 
+        a REVIEW or ALLOW up to BLOCK if the probability exceeds 0.85.
+      </p>
+      <div class="decision-grid">
+        <div class="decision-cell">
+          <span class="decision-action block">BLOCK</span>
+          <div class="decision-condition">Rule engine fired a block-level flag, <em>or</em> ML score ≥ 0.85</div>
+        </div>
+        <div class="decision-cell">
+          <span class="decision-action review">REVIEW</span>
+          <div class="decision-condition">Rule engine flagged a warning, <em>or</em> ML score ≥ 0.55</div>
+        </div>
+        <div class="decision-cell">
+          <span class="decision-action allow">ALLOW</span>
+          <div class="decision-condition">No rule violations and ML score &lt; 0.55</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Response format -->
+    <div id="response" class="endpoint-section">
+      <div style="font-family:var(--display);font-size:1.4rem;font-weight:800;color:var(--text-bright);letter-spacing:-0.03em;margin-bottom:0.75rem">Response Format</div>
+      <p class="ep-desc">All endpoints return the same JSON shape:</p>
+      <div class="code-wrap">
+        <div class="code-top"><span class="code-lang">JSON Response</span></div>
+        <pre class="code-content">{
+  <span class="key">"module"</span>:      <span class="str">"payment_fraud"</span>,
+  <span class="key">"fraud_score"</span>: <span class="num">0.9412</span>,          <span class="cm">// 0.0 (safe) → 1.0 (fraud)</span>
+  <span class="key">"action"</span>:      <span class="str">"block"</span>,          <span class="cm">// "allow" | "review" | "block"</span>
+  <span class="key">"rule_flags"</span>: [                   <span class="cm">// all rules that fired</span>
+    <span class="str">"COUNTRY_MISMATCH: billing=US, shipping=NG"</span>,
+    <span class="str">"CARD_VELOCITY: 5 different cards used in 24h"</span>,
+    <span class="str">"DIGITAL_GOODS_RISK: high-value digital purchase on new account"</span>
+  ],
+  <span class="key">"request_id"</span>: <span class="str">"a3f9b2c1"</span>         <span class="cm">// short unique ID for audit trail</span>
+}</pre>
+      </div>
+    </div>
+
+    <!-- POST /check/login -->
+    <div id="login" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method POST">POST</span>
+        <span class="ep-path">/check/login</span>
+      </div>
+      <p class="ep-desc">
+        Checks a login attempt for account takeover signals. Detects brute-force 
+        attacks, impossible travel, new device + foreign country combinations, 
+        and logins during suspicious hours.
+      </p>
+
+      <div class="sub-heading">Request Body</div>
+      <table class="fields-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">user_id</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Internal user identifier</td></tr>
+          <tr><td class="field-name">email</td><td class="field-type">email</td><td><span class="field-req req">req</span></td><td class="field-desc">User's email address</td></tr>
+          <tr><td class="field-name">ip_address</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Client IP of the login request</td></tr>
+          <tr><td class="field-name">user_agent</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Browser / device User-Agent header</td></tr>
+          <tr><td class="field-name">login_timestamp</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">ISO-8601 datetime of the login attempt</td></tr>
+          <tr><td class="field-name">last_known_ip</td><td class="field-type">string</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Previous IP from user's profile</td></tr>
+          <tr><td class="field-name">last_known_country</td><td class="field-type">string</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Previous country code (e.g. "US")</td></tr>
+          <tr><td class="field-name">current_country</td><td class="field-type">string</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Current IP country code</td></tr>
+          <tr><td class="field-name">failed_attempts</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Failed attempts in last 24h (default: 0)</td></tr>
+          <tr><td class="field-name">new_device</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">True if device ID not seen before (default: false)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sub-heading">Example Request</div>
+      <div class="code-wrap">
+        <div class="code-top">
+          <span class="code-lang">Python</span>
+          <button class="copy-btn" onclick="copyCode(this, 'loginCode')">Copy</button>
+        </div>
+        <pre class="code-content" id="loginCode">requests.<span class="kw">post</span>(<span class="str">"http://localhost:8000/check/login"</span>, json={
+    <span class="key">"user_id"</span>:            <span class="str">"u_001"</span>,
+    <span class="key">"email"</span>:              <span class="str">"alice@example.com"</span>,
+    <span class="key">"ip_address"</span>:         <span class="str">"203.0.113.42"</span>,
+    <span class="key">"user_agent"</span>:         <span class="str">"Mozilla/5.0 (Windows NT 10.0)"</span>,
+    <span class="key">"login_timestamp"</span>:    <span class="str">"2025-03-15T03:22:00"</span>,
+    <span class="key">"last_known_country"</span>: <span class="str">"US"</span>,
+    <span class="key">"current_country"</span>:    <span class="str">"RU"</span>,
+    <span class="key">"failed_attempts"</span>:    <span class="num">9</span>,
+    <span class="key">"new_device"</span>:         <span class="kw">True</span>,
+})</pre>
+      </div>
+    </div>
+
+    <!-- POST /check/signup -->
+    <div id="signup" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method POST">POST</span>
+        <span class="ep-path">/check/signup</span>
+      </div>
+      <p class="ep-desc">
+        Checks a new account registration for identity theft signals — synthetic identities, 
+        SSN reuse, disposable email domains, and IP-based account farms.
+      </p>
+
+      <div class="sub-heading">Request Body</div>
+      <table class="fields-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">email</td><td class="field-type">email</td><td><span class="field-req req">req</span></td><td class="field-desc">Registration email</td></tr>
+          <tr><td class="field-name">full_name</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Applicant's full name</td></tr>
+          <tr><td class="field-name">date_of_birth</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Format: YYYY-MM-DD</td></tr>
+          <tr><td class="field-name">ssn_last4</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Last 4 digits of SSN</td></tr>
+          <tr><td class="field-name">ip_address</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Client IP at registration</td></tr>
+          <tr><td class="field-name">email_seen_before</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Email already in your DB</td></tr>
+          <tr><td class="field-name">ssn_seen_before</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">SSN already registered</td></tr>
+          <tr><td class="field-name">name_dob_mismatch</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Name/DOB inconsistency detected</td></tr>
+          <tr><td class="field-name">accounts_from_ip</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Existing accounts from this IP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- POST /check/payment -->
+    <div id="payment" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method POST">POST</span>
+        <span class="ep-path">/check/payment</span>
+      </div>
+      <p class="ep-desc">
+        Analyzes a checkout transaction for payment fraud — carding attacks, 
+        card velocity, country mismatches, and digital goods risk on new accounts.
+      </p>
+
+      <div class="sub-heading">Request Body</div>
+      <table class="fields-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">user_id</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">User placing the order</td></tr>
+          <tr><td class="field-name">order_id</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Unique order identifier</td></tr>
+          <tr><td class="field-name">amount_usd</td><td class="field-type">float</td><td><span class="field-req req">req</span></td><td class="field-desc">Transaction amount in USD</td></tr>
+          <tr><td class="field-name">ip_address</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Client IP at checkout</td></tr>
+          <tr><td class="field-name">card_bin</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">First 6 digits of card number</td></tr>
+          <tr><td class="field-name">billing_country</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">2-letter country code (e.g. "US")</td></tr>
+          <tr><td class="field-name">shipping_country</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">2-letter country code</td></tr>
+          <tr><td class="field-name">email</td><td class="field-type">email</td><td><span class="field-req req">req</span></td><td class="field-desc">Buyer email</td></tr>
+          <tr><td class="field-name">cards_used_24h</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Distinct cards used in last 24h (default: 1)</td></tr>
+          <tr><td class="field-name">orders_24h</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Orders placed in last 24h (default: 1)</td></tr>
+          <tr><td class="field-name">account_age_days</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Days since account creation (default: 0)</td></tr>
+          <tr><td class="field-name">is_digital_goods</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">True for software, gift cards, downloads (default: false)</td></tr>
+          <tr><td class="field-name">address_match</td><td class="field-type">boolean</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Billing matches shipping address (default: true)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sub-heading">Example — High-Risk Carding Pattern</div>
+      <div class="code-wrap">
+        <div class="code-top">
+          <span class="code-lang">Python</span>
+          <button class="copy-btn" onclick="copyCode(this, 'payCode')">Copy</button>
+        </div>
+        <pre class="code-content" id="payCode">requests.<span class="kw">post</span>(<span class="str">"http://localhost:8000/check/payment"</span>, json={
+    <span class="key">"user_id"</span>:          <span class="str">"u_042"</span>,
+    <span class="key">"order_id"</span>:         <span class="str">"ord_9981"</span>,
+    <span class="key">"amount_usd"</span>:       <span class="num">1499.99</span>,
+    <span class="key">"ip_address"</span>:       <span class="str">"185.220.101.5"</span>,
+    <span class="key">"card_bin"</span>:         <span class="str">"411111"</span>,
+    <span class="key">"billing_country"</span>:  <span class="str">"US"</span>,
+    <span class="key">"shipping_country"</span>: <span class="str">"NG"</span>,
+    <span class="key">"email"</span>:            <span class="str">"buyer@example.com"</span>,
+    <span class="key">"cards_used_24h"</span>:   <span class="num">5</span>,
+    <span class="key">"orders_24h"</span>:       <span class="num">3</span>,
+    <span class="key">"account_age_days"</span>: <span class="num">1</span>,
+    <span class="key">"is_digital_goods"</span>: <span class="kw">False</span>,
+    <span class="key">"address_match"</span>:    <span class="kw">False</span>,
+})
+<span class="cm"># → action: "block", fraud_score: 0.94</span></pre>
+      </div>
+    </div>
+
+    <!-- POST /check/promo -->
+    <div id="promo" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method POST">POST</span>
+        <span class="ep-path">/check/promo</span>
+      </div>
+      <p class="ep-desc">
+        Detects promotion/coupon abuse — IP clusters, device clusters, 
+        multi-redemption by the same user, and throwaway account patterns.
+      </p>
+
+      <div class="sub-heading">Request Body</div>
+      <table class="fields-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">user_id</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">User redeeming the promo</td></tr>
+          <tr><td class="field-name">email</td><td class="field-type">email</td><td><span class="field-req req">req</span></td><td class="field-desc">User's email</td></tr>
+          <tr><td class="field-name">promo_code</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">The coupon/promo code being redeemed</td></tr>
+          <tr><td class="field-name">ip_address</td><td class="field-type">string</td><td><span class="field-req req">req</span></td><td class="field-desc">Client IP at redemption</td></tr>
+          <tr><td class="field-name">accounts_same_ip</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Accounts sharing this IP (default: 1)</td></tr>
+          <tr><td class="field-name">accounts_same_device</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Accounts sharing this device (default: 1)</td></tr>
+          <tr><td class="field-name">redemptions_by_user</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Times this user has redeemed (default: 0)</td></tr>
+          <tr><td class="field-name">account_age_days</td><td class="field-type">integer</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Days since account creation (default: 0)</td></tr>
+          <tr><td class="field-name">device_id</td><td class="field-type">string</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Unique device identifier</td></tr>
+          <tr><td class="field-name">email_domain</td><td class="field-type">string</td><td><span class="field-req opt">opt</span></td><td class="field-desc">Override email domain for disposable check</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- GET /dashboard/stream -->
+    <div id="stream" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method GET">GET</span>
+        <span class="ep-path">/dashboard/stream</span>
+      </div>
+      <p class="ep-desc">
+        Server-Sent Events endpoint. Connect here to receive a real-time stream 
+        of every BLOCK and REVIEW event as they're detected. Sends a ping every 15 
+        seconds to keep the connection alive.
+      </p>
+
+      <div class="sub-heading">JavaScript Client Example</div>
+      <div class="code-wrap">
+        <div class="code-top">
+          <span class="code-lang">JavaScript</span>
+          <button class="copy-btn" onclick="copyCode(this, 'sseCode')">Copy</button>
+        </div>
+        <pre class="code-content" id="sseCode"><span class="kw">const</span> es = <span class="kw">new</span> EventSource(<span class="str">"http://localhost:8000/dashboard/stream"</span>);
+
+es.onmessage = (event) => {
+  <span class="kw">const</span> data = JSON.<span class="kw">parse</span>(event.data);
+
+  <span class="kw">if</span> (data.event_type === <span class="str">"ping"</span>) <span class="kw">return</span>;  <span class="cm">// keep-alive</span>
+
+  console.<span class="kw">log</span>(data);
+  <span class="cm">// {</span>
+  <span class="cm">//   event_type: "fraud_alert",</span>
+  <span class="cm">//   module: "payment_fraud",</span>
+  <span class="cm">//   action: "block",</span>
+  <span class="cm">//   fraud_score: 0.94,</span>
+  <span class="cm">//   rule_flags: [...],</span>
+  <span class="cm">//   summary: "Payment $1499.99 ...",</span>
+  <span class="cm">//   timestamp: "2025-03-15T03:22:00Z"</span>
+  <span class="cm">// }</span>
+};</pre>
+      </div>
+    </div>
+
+    <!-- GET /health -->
+    <div id="health" class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="ep-method GET">GET</span>
+        <span class="ep-path">/health</span>
+      </div>
+      <p class="ep-desc">Returns server status and current timestamp. Use to verify the API is running.</p>
+      <div class="code-wrap">
+        <div class="code-top"><span class="code-lang">JSON Response</span></div>
+        <pre class="code-content">{ <span class="key">"status"</span>: <span class="str">"ok"</span>, <span class="key">"timestamp"</span>: <span class="str">"2025-03-15T12:00:00.000Z"</span> }</pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Sidebar active link on scroll
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.sidebar-link[href^="#"]');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) cur = s.id;
+  });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+});
+
+// Copy button
+function copyCode(btn, id) {
+  const pre = document.getElementById(id);
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,56 @@
-venv/
-__pycache__/
-*.pkl
 *.pyc
+
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environment ──
+venv/
+.venv/
+env/
+.env/
+
+# ── Environment variables ──
 .env
+.env.local
+.env.*.local
+
+# ── Database ──
+*.db
+*.sqlite
+*.sqlite3
+fraudshield.db
+
+# ── ML models (large binary files — regenerate with train.py) ──
+models/
+*.pkl
+*.joblib
+
+# ── Training data (regenerate with data_gen.py) ──
 data/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs ──
+*.log
+logs/
+
+# ── pytest ──
+.pytest_cache/
+.coverage
+htmlcov/
+
