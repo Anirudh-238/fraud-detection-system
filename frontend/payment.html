@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Promo Check — FraudShield</title>
+  <title>Payment Check — FraudShield</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,8 +15,8 @@
   <ul class="nav-links">
     <li><a href="login.html">Login</a></li>
     <li><a href="signup.html">Signup</a></li>
-    <li><a href="payment.html">Payment</a></li>
-    <li><a href="promo.html" class="active">Promo</a></li>
+    <li><a href="payment.html" class="active">Payment</a></li>
+    <li><a href="promo.html">Promo</a></li>
     <li><a href="api-docs.html">API Docs</a></li>
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
@@ -24,72 +24,96 @@
 
 <div class="page">
   <div class="page-header">
-    <div class="module-tag">Module 04 / Promotion Abuse Detection</div>
-    <h1>Promo Check</h1>
-    <p>Detect coupon farming, multi-account abuse, and disposable identity clusters.</p>
+    <div class="module-tag">Module 03 / Payment Fraud Detection</div>
+    <h1>Payment Check</h1>
+    <p>Analyze a checkout transaction for carding, velocity abuse, and cross-border fraud.</p>
   </div>
 
   <div class="presets">
-    <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Legit redemption</button>
-    <button class="preset-btn fraud" onclick="fillPreset('cluster')">⚠ IP cluster</button>
-    <button class="preset-btn fraud" onclick="fillPreset('multi')">⚠ Multi-redeem</button>
-    <button class="preset-btn fraud" onclick="fillPreset('full')">⚠ Full abuse combo</button>
+    <button class="preset-btn legit" onclick="fillPreset('clean')">✓ Normal purchase</button>
+    <button class="preset-btn fraud" onclick="fillPreset('carding')">⚠ Carding pattern</button>
+    <button class="preset-btn fraud" onclick="fillPreset('velocity')">⚠ Order velocity</button>
+    <button class="preset-btn fraud" onclick="fillPreset('digital')">⚠ Digital goods risk</button>
   </div>
 
-  <form id="promoForm">
+  <form id="paymentForm">
     <div class="card">
-      <div class="card-title">Redemption Request</div>
+      <div class="card-title">Order Details</div>
       <div class="field-row">
         <div class="field">
           <label>User ID</label>
-          <input type="text" id="user_id" placeholder="u_777" required>
+          <input type="text" id="user_id" placeholder="u_042" required>
         </div>
         <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="user@example.com" required>
+          <label>Order ID</label>
+          <input type="text" id="order_id" placeholder="ord_9981" required>
         </div>
       </div>
       <div class="field-row">
         <div class="field">
-          <label>Promo Code</label>
-          <input type="text" id="promo_code" placeholder="SAVE50" required>
+          <label>Amount (USD)</label>
+          <input type="number" id="amount_usd" placeholder="99.99" step="0.01" min="0.01" required>
+        </div>
+        <div class="field">
+          <label>Card BIN (first 6 digits)</label>
+          <input type="text" id="card_bin" placeholder="411111" maxlength="6" pattern="\d{6}" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="buyer@example.com" required>
         </div>
         <div class="field">
           <label>IP Address</label>
-          <input type="text" id="ip_address" placeholder="10.10.10.1" required>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Device ID</label>
-          <input type="text" id="device_id" placeholder="dev_xyz">
-        </div>
-        <div class="field">
-          <label>Email Domain (override)</label>
-          <input type="text" id="email_domain" placeholder="auto-detected">
+          <input type="text" id="ip_address" placeholder="203.0.113.1" required>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Cluster Signals</div>
-      <div class="field-row-3">
+      <div class="card-title">Geography</div>
+      <div class="field-row">
         <div class="field">
-          <label>Accounts (same IP)</label>
-          <input type="number" id="accounts_same_ip" value="1" min="1">
+          <label>Billing Country</label>
+          <input type="text" id="billing_country" placeholder="US" maxlength="2" required>
         </div>
         <div class="field">
-          <label>Accounts (same device)</label>
-          <input type="number" id="accounts_same_device" value="1" min="1">
-        </div>
-        <div class="field">
-          <label>Times redeemed (this user)</label>
-          <input type="number" id="redemptions_by_user" value="0" min="0">
+          <label>Shipping Country</label>
+          <input type="text" id="shipping_country" placeholder="US" maxlength="2" required>
         </div>
       </div>
-      <div class="field">
-        <label>Account age (days)</label>
-        <input type="number" id="account_age_days" value="180" min="0">
+      <div class="toggle-field">
+        <label>Billing address matches shipping address</label>
+        <label class="toggle">
+          <input type="checkbox" id="address_match" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Velocity & Account Signals</div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>Cards used (24h)</label>
+          <input type="number" id="cards_used_24h" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Orders (24h)</label>
+          <input type="number" id="orders_24h" value="1" min="1">
+        </div>
+        <div class="field">
+          <label>Account age (days)</label>
+          <input type="number" id="account_age_days" value="365" min="0">
+        </div>
+      </div>
+      <div class="toggle-field">
+        <label>Digital goods (no physical shipping)</label>
+        <label class="toggle">
+          <input type="checkbox" id="is_digital_goods">
+          <span class="toggle-slider"></span>
+        </label>
       </div>
     </div>
 
@@ -105,28 +129,32 @@ const API = 'http://127.0.0.1:8000';
 
 const PRESETS = {
   clean: {
-    user_id: 'u_100', email: 'loyal.customer@gmail.com', promo_code: 'WELCOME10',
-    ip_address: '72.14.192.5', device_id: 'dev_iphone_x1',
-    email_domain: '', accounts_same_ip: 1, accounts_same_device: 1,
-    redemptions_by_user: 0, account_age_days: 365,
+    user_id: 'u_001', order_id: 'ord_1001', amount_usd: 49.99, card_bin: '411111',
+    email: 'alice@gmail.com', ip_address: '72.14.192.5',
+    billing_country: 'US', shipping_country: 'US',
+    address_match: true, cards_used_24h: 1, orders_24h: 1,
+    account_age_days: 720, is_digital_goods: false,
   },
-  cluster: {
-    user_id: 'u_201', email: 'user201@gmail.com', promo_code: 'SAVE50',
-    ip_address: '10.10.10.1', device_id: 'dev_abc',
-    email_domain: '', accounts_same_ip: 9, accounts_same_device: 2,
-    redemptions_by_user: 0, account_age_days: 30,
+  carding: {
+    user_id: 'u_042', order_id: 'ord_9981', amount_usd: 1499.99, card_bin: '411111',
+    email: 'buyer@example.com', ip_address: '185.220.101.5',
+    billing_country: 'US', shipping_country: 'NG',
+    address_match: false, cards_used_24h: 5, orders_24h: 3,
+    account_age_days: 1, is_digital_goods: false,
   },
-  multi: {
-    user_id: 'u_555', email: 'bargainhunter@outlook.com', promo_code: 'FREESHIP',
-    ip_address: '203.0.113.15', device_id: 'dev_laptop',
-    email_domain: '', accounts_same_ip: 2, accounts_same_device: 1,
-    redemptions_by_user: 4, account_age_days: 90,
+  velocity: {
+    user_id: 'u_199', order_id: 'ord_4422', amount_usd: 89.99, card_bin: '522100',
+    email: 'shopper@hotmail.com', ip_address: '203.0.113.30',
+    billing_country: 'US', shipping_country: 'US',
+    address_match: true, cards_used_24h: 3, orders_24h: 12,
+    account_age_days: 3, is_digital_goods: false,
   },
-  full: {
-    user_id: 'u_999', email: 'freebie99@mailinator.com', promo_code: 'SAVE50',
-    ip_address: '10.10.10.1', device_id: 'dev_xyz',
-    email_domain: 'mailinator.com', accounts_same_ip: 8, accounts_same_device: 5,
-    redemptions_by_user: 3, account_age_days: 0,
+  digital: {
+    user_id: 'u_321', order_id: 'ord_7770', amount_usd: 2499.00, card_bin: '676110',
+    email: 'gamer@yopmail.com', ip_address: '91.108.4.100',
+    billing_country: 'DE', shipping_country: 'DE',
+    address_match: true, cards_used_24h: 4, orders_24h: 6,
+    account_age_days: 0, is_digital_goods: true,
   },
 };
 
@@ -134,13 +162,15 @@ function fillPreset(key) {
   const p = PRESETS[key];
   Object.entries(p).forEach(([k, v]) => {
     const el = document.getElementById(k);
-    if (el) el.value = v;
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = v;
+    else el.value = v;
   });
 }
 
 fillPreset('clean');
 
-document.getElementById('promoForm').addEventListener('submit', async (e) => {
+document.getElementById('paymentForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn      = document.getElementById('submitBtn');
   const resultEl = document.getElementById('result');
@@ -149,25 +179,24 @@ document.getElementById('promoForm').addEventListener('submit', async (e) => {
   btn.disabled = true; btn.textContent = 'Analyzing...';
   resultEl.style.display = 'none'; errorEl.style.display = 'none';
 
-  const emailVal    = document.getElementById('email').value;
-  const domainField = document.getElementById('email_domain').value.trim();
-  const autoDomain  = emailVal.includes('@') ? emailVal.split('@')[1] : null;
-
   const body = {
-    user_id:              document.getElementById('user_id').value,
-    email:                emailVal,
-    promo_code:           document.getElementById('promo_code').value,
-    ip_address:           document.getElementById('ip_address').value,
-    device_id:            document.getElementById('device_id').value || null,
-    email_domain:         domainField || autoDomain || null,
-    accounts_same_ip:     parseInt(document.getElementById('accounts_same_ip').value),
-    accounts_same_device: parseInt(document.getElementById('accounts_same_device').value),
-    redemptions_by_user:  parseInt(document.getElementById('redemptions_by_user').value),
-    account_age_days:     parseInt(document.getElementById('account_age_days').value),
+    user_id:          document.getElementById('user_id').value,
+    order_id:         document.getElementById('order_id').value,
+    amount_usd:       parseFloat(document.getElementById('amount_usd').value),
+    ip_address:       document.getElementById('ip_address').value,
+    card_bin:         document.getElementById('card_bin').value,
+    billing_country:  document.getElementById('billing_country').value.toUpperCase(),
+    shipping_country: document.getElementById('shipping_country').value.toUpperCase(),
+    email:            document.getElementById('email').value,
+    cards_used_24h:   parseInt(document.getElementById('cards_used_24h').value),
+    orders_24h:       parseInt(document.getElementById('orders_24h').value),
+    account_age_days: parseInt(document.getElementById('account_age_days').value),
+    is_digital_goods: document.getElementById('is_digital_goods').checked,
+    address_match:    document.getElementById('address_match').checked,
   };
 
   try {
-    const res = await fetch(`${API}/check/promo`, {
+    const res = await fetch(`${API}/check/payment`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
@@ -196,7 +225,7 @@ function renderResult(el, data) {
     <div class="result-header">
       <span class="action-badge">${data.action.toUpperCase()}</span>
       <span style="font-size:0.78rem;color:var(--text-dim)">
-        ${action === 'block' ? '🚫 Redemption blocked' : action === 'review' ? '🔍 Queued for review' : '✓ Redemption approved'}
+        ${action === 'block' ? '🚫 Payment declined' : action === 'review' ? '🔍 Payment queued for review' : '✓ Payment approved'}
       </span>
       <div class="result-score">Fraud Score <span>${score}%</span></div>
     </div>

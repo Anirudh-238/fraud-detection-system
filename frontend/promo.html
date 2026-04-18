@@ -17,13 +17,14 @@
     <li><a href="signup.html">Signup</a></li>
     <li><a href="payment.html">Payment</a></li>
     <li><a href="promo.html" class="active">Promo</a></li>
+    <li><a href="api-docs.html">API Docs</a></li>
     <li><a href="dashboard.html" class="dashboard-link">⬡ Dashboard</a></li>
   </ul>
 </nav>
 
 <div class="page">
   <div class="page-header">
-    <div class="module-tag">Module 04 / Promotion Abuse</div>
+    <div class="module-tag">Module 04 / Promotion Abuse Detection</div>
     <h1>Promo Check</h1>
     <p>Detect coupon farming, multi-account abuse, and disposable identity clusters.</p>
   </div>
@@ -92,9 +93,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn-submit" id="submitBtn">
-      Run Fraud Check →
-    </button>
+    <button type="submit" class="btn-submit" id="submitBtn">Run Fraud Check →</button>
   </form>
 
   <div id="result" style="display:none"></div>
@@ -143,14 +142,12 @@ fillPreset('clean');
 
 document.getElementById('promoForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn = document.getElementById('submitBtn');
+  const btn      = document.getElementById('submitBtn');
   const resultEl = document.getElementById('result');
   const errorEl  = document.getElementById('errorMsg');
 
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
-  resultEl.style.display = 'none';
-  errorEl.style.display  = 'none';
+  btn.disabled = true; btn.textContent = 'Analyzing...';
+  resultEl.style.display = 'none'; errorEl.style.display = 'none';
 
   const emailVal    = document.getElementById('email').value;
   const domainField = document.getElementById('email_domain').value.trim();
@@ -179,11 +176,10 @@ document.getElementById('promoForm').addEventListener('submit', async (e) => {
     renderResult(resultEl, data);
     resultEl.style.display = 'block';
   } catch (err) {
-    errorEl.innerHTML = `<div class="error-msg">⚠ ${err.message}<br><small>Make sure the FastAPI server is running at ${API}</small></div>`;
+    errorEl.innerHTML = `<div class="error-msg">⚠ ${err.message}<br><small>Make sure FastAPI is running at ${API}</small></div>`;
     errorEl.style.display = 'block';
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Run Fraud Check →';
+    btn.disabled = false; btn.textContent = 'Run Fraud Check →';
   }
 });
 
